@@ -133,11 +133,14 @@ The frontend is a React single-page application (SPA) built with Vite and TypeSc
 
 ```
 frontend/
+├── public/
 ├── src/
 │   ├── components/
 │   │   ├── ConfigPanel.tsx       # Left panel — analysis configuration form
 │   │   ├── OutputPanel.tsx       # Right panel — live logs and results
 │   │   └── fields/               # Individual form field components
+│   │       ├── ReasoningEffortField.tsx
+│   │       └── ...
 │   ├── hooks/
 │   │   └── useWebSocket.ts       # WebSocket connection hook (auto-reconnect)
 │   ├── services/
@@ -154,6 +157,8 @@ frontend/
 └── package.json
 ```
 
+---
+
 ### Install Packages
 
 Requires **Node.js 18+** and **npm**.
@@ -162,6 +167,8 @@ Requires **Node.js 18+** and **npm**.
 cd frontend
 npm install
 ```
+
+---
 
 ### Run Locally
 
@@ -172,6 +179,10 @@ cp frontend/.env.example frontend/.env.local
 ```
 
 2. Edit `frontend/.env.local`:
+cp .env.example .env.local
+```
+
+2. Edit `.env.local`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000
@@ -193,10 +204,17 @@ The app will be available at **http://localhost:5173**.
 
 ```bash
 cd frontend
+---
+
+### Build for Production
+
+```bash
 npm run build
 ```
 
 Output is placed in `frontend/dist/`.
+
+---
 
 ### Deploy to Vercel
 
@@ -255,6 +273,10 @@ After deploying, set the following in your Vercel project dashboard under **Sett
 |---------------------|--------------------------|--------------------------------------|
 | `VITE_API_BASE_URL` | Backend REST API base URL | `https://your-service.onrender.com` |
 | `VITE_WS_URL`       | Backend WebSocket URL     | `wss://your-service.onrender.com/ws`|
+| Variable            | Description                              | Example                              |
+|---------------------|------------------------------------------|--------------------------------------|
+| `VITE_API_BASE_URL` | Backend REST API base URL                | `https://your-backend.onrender.com`  |
+| `VITE_WS_URL`       | Backend WebSocket URL                    | `wss://your-backend.onrender.com/ws` |
 
 Then redeploy for the variables to take effect:
 

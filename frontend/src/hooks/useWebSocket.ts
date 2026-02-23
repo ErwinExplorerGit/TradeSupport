@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { WebSocketMessage, AnalysisState } from '../types';
 
-const WS_URL = 'ws://localhost:8000/ws';
+const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000/ws';
 const RECONNECT_DELAY = 3000;
 
 export interface UseWebSocketResult {
