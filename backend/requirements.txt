@@ -3,6 +3,7 @@ langchain-openai
 langchain-experimental
 pandas
 yfinance
+curl_cffi
 praw
 feedparser
 stockstats
