@@ -1,0 +1,21 @@
+{
+  "root": [
+    "./src/app.tsx",
+    "./src/main.tsx",
+    "./src/vite-env.d.ts",
+    "./src/components/configpanel.tsx",
+    "./src/components/outputpanel.tsx",
+    "./src/components/fields/analystsfield.tsx",
+    "./src/components/fields/datefield.tsx",
+    "./src/components/fields/deepmodelfield.tsx",
+    "./src/components/fields/llmproviderfield.tsx",
+    "./src/components/fields/researchdepthfield.tsx",
+    "./src/components/fields/shallowmodelfield.tsx",
+    "./src/components/fields/tickerfield.tsx",
+    "./src/components/fields/index.ts",
+    "./src/hooks/usewebsocket.ts",
+    "./src/services/api.ts",
+    "./src/types/index.ts"
+  ],
+  "version": "5.6.3"
+}
