@@ -41,7 +41,9 @@ export const useWebSocket = (): UseWebSocketResult => {
       try {
         const data: WebSocketMessage = JSON.parse(event.data);
 
-        if (data.type === 'log') {
+        if (data.type === 'ping') {
+          // Server keepalive ping — ignore silently
+        } else if (data.type === 'log') {
           const timestamp = new Date(data.ts).toLocaleTimeString();
           setMessages((prev) => [...prev, `[${timestamp}] ${data.message}`]);
         } else if (data.type === 'status') {

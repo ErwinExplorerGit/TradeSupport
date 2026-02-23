@@ -36,7 +36,11 @@ export interface ResultMessage {
   payload: any;
 }
 
-export type WebSocketMessage = LogMessage | StatusMessage | ResultMessage;
+export interface PingMessage {
+  type: 'ping';
+}
+
+export type WebSocketMessage = LogMessage | StatusMessage | ResultMessage | PingMessage;
 
 export interface ConfigFormData {
   ticker: string;

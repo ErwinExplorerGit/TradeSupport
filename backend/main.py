@@ -317,13 +317,23 @@ async def websocket_endpoint(websocket: WebSocket):
         )
 
         # Keep connection alive and handle incoming messages
+        # Send a keepalive ping every 30 seconds to prevent Render's
+        # reverse proxy from closing idle WebSocket connections (~55s timeout).
+        KEEPALIVE_INTERVAL = 30
         while True:
             try:
-                # Wait for any client messages (ping/pong)
-                data = await websocket.receive_text()
-                # Echo back for ping/pong
+                data = await asyncio.wait_for(
+                    websocket.receive_text(),
+                    timeout=KEEPALIVE_INTERVAL,
+                )
                 if data == "ping":
                     await websocket.send_text("pong")
+            except asyncio.TimeoutError:
+                # No message received within interval — send a keepalive ping
+                try:
+                    await websocket.send_json({"type": "ping"})
+                except Exception:
+                    break  # Connection is gone
             except WebSocketDisconnect:
                 break
             except Exception as e:
