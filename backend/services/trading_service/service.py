@@ -74,7 +74,7 @@ class TradingService:
 
         try:
             """Attempt to import a core component of the trading agent framework to verify availability."""
-            framework_path = Path(__file__).parent.parent / "tradingagents"
+            framework_path = Path(__file__).parent.parent.parent / "tradingagents"
 
             print(f"Checking for trading agent framework at: {framework_path}")
 
@@ -253,7 +253,7 @@ class TradingService:
         """Run mock analysis for testing without TradingAgents."""
 
         yield "=" * 60
-        yield f"MOCK MODE: Analyzing request.ticker"
+        yield f"MOCK MODE: Analyzing {request.ticker}"
         yield f"Date: {request.analysis_date}"
         yield f"Research Depth: {request.research_depth.value}"
         yield "=" * 60
