@@ -9,7 +9,7 @@ export const api = {
   async startAnalysis(request: AnalysisRequest): Promise<void> {
     console.log(request);
 
-    const response = await fetch(`${API_BASE_URL}/api/start`, {
+    const response = await fetch(`${API_BASE_URL}/api/trading/start`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ export const api = {
    * Stop the current analysis
    */
   async stopAnalysis(): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/stop`, {
+    const response = await fetch(`${API_BASE_URL}/api/trading/stop`, {
       method: 'POST',
     });
 
@@ -54,7 +54,7 @@ export const api = {
    * Get configuration options
    */
   async getConfig(): Promise<ApiConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/config`);
+    const response = await fetch(`${API_BASE_URL}/api/trading/config`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch configuration');

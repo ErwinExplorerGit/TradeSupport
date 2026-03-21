@@ -4,8 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode development",
+    "test": "vite --mode test",
+    "prod": "vite --mode production",
     "build": "tsc -b && vite build",
+    "build:test": "tsc -b && vite build --mode test",
+    "build:prod": "tsc -b && vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview"
   },
