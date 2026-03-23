@@ -1,16 +1,11 @@
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from datetime import datetime
 import logging
 from contextlib import asynccontextmanager
-import asyncio
-from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from models import AnalysisState
 
 # Import services
 from services.trading_service import TradingService, router as trading_router
@@ -19,6 +14,9 @@ from services.auth_service import AuthService, router as auth_router
 from services.auth_service.routes import set_auth_service
 from services.history_service import HistoryService, router as history_router
 from services.history_service.routes import set_history_service
+from services.socket_service import router as socket_router, broadcast_status, broadcast_log
+from services.socket_service import manager as socket_manager
+from services.health_service import router as health_router, set_health_callbacks
 
 """
 FastAPI backend for TradingAgent real-time streaming.
@@ -37,16 +35,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Global state
-active_websockets: list[WebSocket] = []
-current_state: AnalysisState = AnalysisState.IDLE
-
 # Initialize services
 trading_service = TradingService()
 auth_service = AuthService()
 history_service = HistoryService()
 
 
+# TODO: Should i remove lifespan after finishing the app?
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown logic."""
@@ -57,6 +52,11 @@ async def lifespan(app: FastAPI):
     set_auth_service(auth_service)
     set_history_service(history_service)
     set_broadcast_callbacks(broadcast_status, broadcast_log)
+    set_health_callbacks(
+        get_state=lambda: socket_manager.current_state.value,
+        get_trading_mode=lambda: "real" if trading_service.is_real_mode else "mock",
+        get_active_connections=lambda: len(socket_manager.active_websockets),
+    )
 
     yield
     # Cleanup on shutdown
@@ -67,7 +67,7 @@ app = FastAPI(
     title="TradingAgent WebSocket API",
     description="Real-time streaming analysis from TradingAgents framework",
     version="1.0.0",
-    lifespan=lifespan,
+    # lifespan=lifespan,
 )
 
 # Configure CORS
@@ -86,104 +86,8 @@ app.add_middleware(
 app.include_router(trading_router)
 app.include_router(auth_router)
 app.include_router(history_router)
-
-
-async def broadcast_message(message: dict):
-    """Broadcast message to all connected WebSocket clients."""
-    dead_sockets = []
-    for ws in active_websockets:
-        try:
-            await ws.send_json(message)
-        except Exception as e:
-            logger.error(f"Error sending to websocket: {e}")
-            dead_sockets.append(ws)
-
-    # Remove dead connections
-    for ws in dead_sockets:
-        if ws in active_websockets:
-            active_websockets.remove(ws)
-
-
-async def broadcast_status(state: AnalysisState):
-    """Broadcast status update to all clients."""
-    global current_state
-    current_state = state
-    await broadcast_message({"type": "status", "state": state.value})
-
-
-async def broadcast_log(message: str):
-    """Broadcast log message to all clients."""
-    await broadcast_message({"type": "log", "message": message, "ts": datetime.utcnow().isoformat() + "Z"})
-
-
-@app.get("/")
-async def root():
-    """Health check endpoint."""
-    return {
-        "status": "ok",
-        "service": "TradingAgent WebSocket API",
-        "version": "1.0.0",
-    }
-
-
-@app.get("/api/health")
-async def health_check():
-    """Detailed health check for the main application."""
-    return {
-        "status": "healthy",
-        "state": current_state.value,
-        "trading_mode": "real" if trading_service.is_real_mode else "mock",
-        "active_connections": len(active_websockets),
-    }
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """
-    WebSocket endpoint for real-time log streaming.
-    """
-    await websocket.accept()
-    active_websockets.append(websocket)
-    logger.info(f"WebSocket connected. Total connections: {len(active_websockets)}")
-
-    # Send current state on connection
-    try:
-        await websocket.send_json({"type": "status", "state": current_state.value})
-        await websocket.send_json(
-            {
-                "type": "log",
-                "message": "Connected to TradingAgent WebSocket",
-                "ts": datetime.utcnow().isoformat() + "Z",
-            },
-        )
-
-        # Keep connection alive and handle incoming messages
-        # Send a keepalive ping every 30 seconds to keep the connection alive.
-        KEEPALIVE_INTERVAL = 30
-        while True:
-            try:
-                data = await asyncio.wait_for(
-                    websocket.receive_text(),
-                    timeout=KEEPALIVE_INTERVAL,
-                )
-                if data == "ping":
-                    await websocket.send_text("pong")
-            except asyncio.TimeoutError:
-                # No message received within interval — send a keepalive ping
-                try:
-                    await websocket.send_json({"type": "ping"})
-                except Exception:
-                    break  # Connection is gone
-            except WebSocketDisconnect:
-                break
-            except Exception as e:
-                logger.error(f"WebSocket error: {e}")
-                break
-
-    finally:
-        if websocket in active_websockets:
-            active_websockets.remove(websocket)
-        logger.info(f"WebSocket disconnected. Total connections: {len(active_websockets)}")
+app.include_router(socket_router)
+app.include_router(health_router)
 
 
 if __name__ == "__main__":
