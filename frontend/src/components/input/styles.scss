@@ -1,0 +1,96 @@
+@use '../../styles' as *;
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.input-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-control {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid $color-border;
+  border-radius: $border-radius-sm;
+  font-size: 0.95rem;
+  background: $color-white;
+  color: $color-text-primary;
+  transition: border-color $transition-std, box-shadow $transition-std;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #aab3be;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-accent;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+  }
+
+  &:disabled {
+    background: $color-bg-light;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &--error {
+    border-color: $color-red;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.12);
+    }
+  }
+
+  &--suffix {
+    padding-right: 2.8rem;
+  }
+}
+
+.input-suffix {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #aab3be;
+    line-height: 0;
+    font-size: 1.2rem;
+    transition: color $transition-std;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+  }
+}
+
+.input-error-msg {
+  font-size: 0.8rem;
+  color: $color-red;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.input-hint {
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+}

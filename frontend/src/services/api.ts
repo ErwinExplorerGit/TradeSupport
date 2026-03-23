@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AnalysisRequest, ApiConfig, HealthCheckResponse } from '../types';
+import { AnalysisRequest, ApiConfig, HealthCheckResponse, LoginRequest, LoginResponse } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
@@ -65,6 +65,14 @@ export const api = {
    */
   async getConfig(): Promise<ApiConfig> {
     const { data } = await axiosInstance.get<ApiConfig>('/api/trading/config');
+    return data;
+  },
+
+  /**
+   * Authenticate a user with username and password
+   */
+  async login(request: LoginRequest): Promise<LoginResponse> {
+    const { data } = await axiosInstance.post<LoginResponse>('/api/auth/login', request);
     return data;
   },
 };
