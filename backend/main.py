@@ -7,6 +7,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Import database
+from config.database import init_db, close_db
+
 # Import services
 from services.trading_service import TradingService, router as trading_router
 from services.trading_service.routes import set_trading_service, set_broadcast_callbacks
@@ -58,8 +61,13 @@ async def lifespan(app: FastAPI):
         get_active_connections=lambda: len(socket_manager.active_websockets),
     )
 
+    # Initialise database connection pool
+    await init_db()
+
     yield
+
     # Cleanup on shutdown
+    await close_db()
     logger.info("Shutting down TradingAgent FastAPI application")
 
 
@@ -67,7 +75,7 @@ app = FastAPI(
     title="TradingAgent WebSocket API",
     description="Real-time streaming analysis from TradingAgents framework",
     version="1.0.0",
-    # lifespan=lifespan,
+    lifespan=lifespan,
 )
 
 # Configure CORS
