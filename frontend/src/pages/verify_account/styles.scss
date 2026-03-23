@@ -1,0 +1,247 @@
+@use 'sass:color';
+@use '../../styles' as *;
+
+.verify-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, $color-navy-deeper 0%, $color-navy 60%, $color-navy-dark 100%);
+}
+
+.verify-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.verify-card {
+  background: $color-white;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+// ── Loading Spinner ─────────────────────────────────────────────────────────────
+
+.verify-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+
+.verify-spinner-ring {
+  width: 56px;
+  height: 56px;
+  border: 4px solid rgba($color-navy, 0.15);
+  border-top-color: $color-navy;
+  border-radius: 50%;
+  animation: verify-spin 0.85s linear infinite;
+}
+
+@keyframes verify-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ── Status Icon ────────────────────────────────────────────────────────────────
+
+.verify-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+
+  &--success {
+    background: rgba(#27ae60, 0.1);
+    color: #27ae60;
+  }
+
+  &--error {
+    background: rgba($color-red, 0.1);
+    color: $color-red;
+  }
+
+  &--pending {
+    background: rgba($color-navy, 0.08);
+    color: $color-navy-dark;
+  }
+}
+
+// ── Card Header ────────────────────────────────────────────────────────────────
+
+.verify-card-header {
+  margin-bottom: 1.75rem;
+  width: 100%;
+}
+
+.verify-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 0.5rem;
+}
+
+.verify-card-subtitle {
+  font-size: 0.9rem;
+  color: $color-text-muted;
+  line-height: 1.65;
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────────
+
+.verify-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: $border-radius-sm;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: background $transition-fast, opacity $transition-fast;
+
+  &--primary {
+    background: $color-navy;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background: $color-navy-dark;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.verify-btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba($color-white, 0.4);
+  border-top-color: $color-white;
+  border-radius: 50%;
+  animation: verify-spin 0.75s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+// ── Resend Form ────────────────────────────────────────────────────────────────
+
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.verify-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.verify-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.verify-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid $color-border;
+  border-radius: $border-radius-sm;
+  font-size: 0.95rem;
+  background: $color-white;
+  color: $color-text-primary;
+  transition: border-color $transition-std, box-shadow $transition-std;
+
+  &:focus {
+    outline: none;
+    border-color: $color-accent;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+  }
+
+  &.input-error {
+    border-color: $color-red;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.12);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.verify-field-error {
+  font-size: 0.8rem;
+  color: $color-red;
+}
+
+// ── Resend Success ─────────────────────────────────────────────────────────────
+
+.verify-resend-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: rgba(#27ae60, 0.08);
+  border: 1px solid rgba(#27ae60, 0.25);
+  border-radius: $border-radius-sm;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  color: color.adjust(#27ae60, $lightness: -8%);
+  text-align: left;
+  width: 100%;
+  margin-bottom: 1rem;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+.verify-footer {
+  width: 100%;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.verify-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: $color-navy-dark;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-text-primary;
+  }
+}
