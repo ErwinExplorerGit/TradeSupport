@@ -11,6 +11,7 @@ import LoginPage from "./pages/login/index.tsx";
 import NotFoundPage from "./pages/not_found/index.tsx";
 import RegisterPage from "./pages/register/index.tsx";
 import VerifyPasswordPage from "./pages/verify_password/index.tsx";
+import "./styles.scss";
 
 const queryClient = new QueryClient();
 
