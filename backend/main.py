@@ -158,8 +158,7 @@ async def websocket_endpoint(websocket: WebSocket):
         )
 
         # Keep connection alive and handle incoming messages
-        # Send a keepalive ping every 30 seconds to prevent Render's
-        # reverse proxy from closing idle WebSocket connections (~55s timeout).
+        # Send a keepalive ping every 30 seconds to keep the connection alive.
         KEEPALIVE_INTERVAL = 30
         while True:
             try:
