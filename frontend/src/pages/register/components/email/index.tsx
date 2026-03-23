@@ -1,12 +1,10 @@
 import { Input } from "../../../../components";
 import { useRegisterStore } from "../../../../stores";
 
-interface EmailProps {
-  error?: string;
-}
-
-function Email({ error }: EmailProps) {
-  const { email, setEmail } = useRegisterStore();
+function Email() {
+  const email = useRegisterStore((s) => s.email);
+  const error = useRegisterStore((s) => s.errors.email);
+  const setEmail = useRegisterStore((s) => s.setEmail);
 
   return (
     <Input

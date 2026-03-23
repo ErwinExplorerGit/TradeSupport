@@ -1,12 +1,10 @@
 import { Input } from "../../../../components";
 import { useRegisterStore } from "../../../../stores";
 
-interface ConfirmPasswordProps {
-  error?: string;
-}
-
-function ConfirmPassword({ error }: ConfirmPasswordProps) {
-  const { confirmPassword, setConfirmPassword } = useRegisterStore();
+function ConfirmPassword() {
+  const confirmPassword = useRegisterStore((s) => s.confirmPassword);
+  const error = useRegisterStore((s) => s.errors.confirmPassword);
+  const setConfirmPassword = useRegisterStore((s) => s.setConfirmPassword);
 
   return (
     <Input

@@ -1,12 +1,10 @@
 import { Input } from "../../../../components";
 import { useRegisterStore } from "../../../../stores";
 
-interface FirstNameProps {
-  error?: string;
-}
-
-function FirstName({ error }: FirstNameProps) {
-  const { firstName, setFirstName } = useRegisterStore();
+function FirstName() {
+  const firstName = useRegisterStore((s) => s.firstName);
+  const error = useRegisterStore((s) => s.errors.firstName);
+  const setFirstName = useRegisterStore((s) => s.setFirstName);
 
   return (
     <Input
