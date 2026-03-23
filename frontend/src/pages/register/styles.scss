@@ -1,0 +1,174 @@
+@use '../../styles' as *;
+
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, $color-navy-deeper 0%, $color-navy 60%, $color-navy-dark 100%);
+}
+
+.register-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.register-card {
+  background: $color-white;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 460px;
+}
+
+.register-card-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.register-card-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 0.4rem;
+}
+
+.register-card-subtitle {
+  font-size: 0.9rem;
+  color: $color-text-muted;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.register-row {
+  display: flex;
+  gap: 1rem;
+
+  .register-field {
+    flex: 1;
+  }
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.register-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.register-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.register-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid $color-border;
+  border-radius: $border-radius-sm;
+  font-size: 0.95rem;
+  background: $color-white;
+  color: $color-text-primary;
+  transition: border-color $transition-std, box-shadow $transition-std;
+
+  &:focus {
+    outline: none;
+    border-color: $color-accent;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+  }
+
+  &.has-toggle {
+    padding-right: 2.8rem;
+  }
+
+  &.input-error {
+    border-color: $color-red;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.12);
+    }
+  }
+}
+
+.register-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-text-muted;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-text-primary;
+  }
+}
+
+.register-field-error {
+  font-size: 0.8rem;
+  color: $color-red;
+}
+
+.register-submit {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: $border-radius-sm;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: $color-navy-dark;
+  color: $color-white;
+  transition: all $transition-std;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.25rem;
+
+  &:hover {
+    background: $color-navy-darker;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(30, 58, 95, 0.4);
+  }
+}
+
+.register-footer {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.register-login-text {
+  font-size: 0.875rem;
+  color: $color-text-muted;
+
+  a {
+    color: $color-navy;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $color-accent;
+    }
+  }
+}
