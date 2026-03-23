@@ -1,14 +1,16 @@
 import { Link, useNavigate } from "react-router";
 import { useLoginStore } from "../../stores/loginStore";
+import LoginButton from "./components/button";
+import Error from "./components/error";
 import Password from "./components/password";
 import Username from "./components/username";
 import "./styles.scss";
-import LoginButton from "./components/button";
-import Error from "./components/error";
 
 export default function LoginPage() {
   //Handle Navigation
   const navigate = useNavigate();
+
+  const reset = useLoginStore((s) => s.reset);
 
   //Handle form actions
   const submit = useLoginStore((s) => s.submit);
@@ -49,7 +51,10 @@ export default function LoginPage() {
             </Link>
             <span className="login-divider">·</span>
             <p className="login-register-text">
-              Don't have an account? <Link to="/register">Create one</Link>
+              Don't have an account?{" "}
+              <Link to="/register" onClick={reset}>
+                Create one
+              </Link>
             </p>
           </div>
         </div>
