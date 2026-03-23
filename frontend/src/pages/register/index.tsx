@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import "./styles.scss";
 import FirstName from "./components/firstname";
 import LastName from "./components/lastname";
@@ -10,41 +9,13 @@ import RegisterButton from "./components/button";
 import { useRegisterStore } from "../../stores";
 
 export default function RegisterPage() {
-  const firstName = useRegisterStore((s) => s.firstName);
-  const lastName = useRegisterStore((s) => s.lastName);
-  const email = useRegisterStore((s) => s.email);
-  const password = useRegisterStore((s) => s.password);
-  const confirmPassword = useRegisterStore((s) => s.confirmPassword);
+  const navigate = useNavigate();
   const reset = useRegisterStore((s) => s.reset);
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validate = () => {
-    const next: Record<string, string> = {};
-    if (!firstName.trim()) next.firstName = "First name is required.";
-    if (!lastName.trim()) next.lastName = "Last name is required.";
-    if (!email.trim()) {
-      next.email = "Email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "Enter a valid email address.";
-    }
-    if (!password) {
-      next.password = "Password is required.";
-    } else if (password.length < 8) {
-      next.password = "Password must be at least 8 characters.";
-    }
-    if (!confirmPassword) {
-      next.confirmPassword = "Please confirm your password.";
-    } else if (password !== confirmPassword) {
-      next.confirmPassword = "Passwords do not match.";
-    }
-    return next;
-  };
+  const submit = useRegisterStore((s) => s.submit);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const next = validate();
-    setErrors(next);
+    submit(() => navigate("/login"));
   };
 
   return (
@@ -61,16 +32,16 @@ export default function RegisterPage() {
           <form className="register-form" onSubmit={handleSubmit} noValidate>
             <div className="register-row">
               <div className="register-field">
-                <FirstName error={errors.firstName} />
+                <FirstName />
               </div>
               <div className="register-field">
-                <LastName error={errors.lastName} />
+                <LastName />
               </div>
             </div>
 
-            <Email error={errors.email} />
-            <Password error={errors.password} />
-            <ConfirmPassword error={errors.confirmPassword} />
+            <Email />
+            <Password />
+            <ConfirmPassword />
 
             <RegisterButton />
           </form>
