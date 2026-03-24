@@ -50,8 +50,8 @@ class ForgotPasswordService:
         """Generate a reset token, persist its hash, and return the raw token."""
         raw_token = secrets.token_hex(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=2)
-        # expires_at = datetime.now(timezone.utc) + timedelta(minutes=_RESET_EXPIRY_MINUTES)
+        # expires_at = datetime.now(timezone.utc) + timedelta(seconds=2)  # Short expiry for testing
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=_RESET_EXPIRY_MINUTES)
 
         async with self._pool.acquire() as conn:
             await conn.execute(
