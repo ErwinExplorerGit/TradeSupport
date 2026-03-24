@@ -1,55 +1,28 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-import logging
+from fastapi import APIRouter
 
-from .service import AuthService
+from config.database import get_pool
+from utils.bcrypt_utils import hash_password
+from .login import LoginRequest, LoginResponse, login as _login, LoginService
+from .registration import RegisterRequest, RegisterResponse, register as _register, RegistrationService
 
-logger = logging.getLogger(__name__)
-
-# Create router
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# Service instance (will be set by main.py)
-auth_service: Optional[AuthService] = None
+# In-memory user store for login (mock) — seeded with demo accounts
+_users: dict[str, str] = {
+    "admin": hash_password("admin123"),
+    "user": hash_password("user123"),
+    "demo": hash_password("demo123"),
+}
 
-
-def set_auth_service(service: AuthService):
-    """Set the auth service instance."""
-    global auth_service
-    auth_service = service
-
-
-class LoginRequest(BaseModel):
-    """Login request model."""
-
-    username: str
-    password: str
-
-
-class LoginResponse(BaseModel):
-    """Login response model."""
-
-    message: str
-    username: str
+_login_service = LoginService(_users)
 
 
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
-    """
-    Login endpoint with hardcoded credentials.
+    return await _login(request, _login_service)
 
-    Hardcoded credentials:
-    - admin / admin123
-    - user / user123
-    - demo / demo123
-    """
-    if not auth_service:
-        raise HTTPException(status_code=500, detail="Auth service not initialized")
 
-    if auth_service.authenticate(request.username, request.password):
-        logger.info(f"Successful login for user: {request.username}")
-        return LoginResponse(message="logged in", username=request.username)
-    else:
-        logger.warning(f"Failed login attempt for user: {request.username}")
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+@router.post("/register", response_model=RegisterResponse, status_code=201)
+async def register(request: RegisterRequest):
+    registration_service = RegistrationService(get_pool())
+    return await _register(request, registration_service)

@@ -9,7 +9,7 @@ This module contains all microservices organized in their own folders:
 
 # Import services for backward compatibility
 from .trading_service import TradingService
-from .auth_service import AuthService
+from .auth_service import router as auth_router
 from .history_service import HistoryService
 
-__all__ = ["TradingService", "AuthService", "HistoryService"]
+__all__ = ["TradingService", "auth_router", "HistoryService"]

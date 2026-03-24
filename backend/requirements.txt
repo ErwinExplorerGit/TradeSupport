@@ -33,3 +33,5 @@ pydantic-settings
 python-dotenv
 websockets
 python-multipart
+asyncpg
+bcrypt
