@@ -5,11 +5,15 @@ import { useVerifyAccountStore } from "../../../../stores/verifyAccountStore";
 
 export default function ResendVerification() {
   const email = useVerifyAccountStore((s) => s.email);
+  const emailError = useVerifyAccountStore((s) => s.emailError);
   const resendLoading = useVerifyAccountStore((s) => s.resendLoading);
   const resendSent = useVerifyAccountStore((s) => s.resendSent);
   const resend = useVerifyAccountStore((s) => s.resend);
 
-  const handleResend = () => resend();
+  const handleResend = (e: React.FormEvent) => {
+    e.preventDefault();
+    resend("login");
+  };
 
   return (
     <>
@@ -20,7 +24,7 @@ export default function ResendVerification() {
         <h1 className="verify-card-title">Verify your email</h1>
         <p className="verify-card-subtitle">
           Your login was successful, but you need to verify your email before
-          continuing.
+          continuing. We sent a link to <strong>{email}</strong>.
         </p>
       </div>
 
@@ -33,9 +37,19 @@ export default function ResendVerification() {
           </span>
         </div>
       ) : (
-        <Button type="button" loading={resendLoading} onClick={handleResend}>
-          Resend verification email
-        </Button>
+        <form onSubmit={handleResend} style={{ width: "100%" }}>
+          {emailError && (
+            <p
+              className="verify-field-error"
+              style={{ marginBottom: "0.75rem" }}
+            >
+              {emailError}
+            </p>
+          )}
+          <Button type="submit" loading={resendLoading}>
+            Resend verification email
+          </Button>
+        </form>
       )}
 
       <div className="verify-footer">

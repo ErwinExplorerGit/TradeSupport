@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timezone
 
 from asyncpg import Pool
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -15,16 +16,44 @@ class VerifyService:
 
     async def verify_token(self, raw_token: str) -> bool:
         """
-        Hash the raw token, find a matching unverified user whose token has not
-        expired, mark them as verified, and clear the token fields.
+        Hash the raw token, check it exists, then verify it has not expired and
+        the account is not already verified before marking the user as verified.
 
-        Returns True if a row was updated, False otherwise.
+        Raises HTTPException 400 for expired or already-verified tokens.
+        Returns True if the account was successfully verified.
         """
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
         now = datetime.now(timezone.utc)
 
         async with self._pool.acquire() as conn:
-            result = await conn.execute(
+            row = await conn.fetchrow(
+                """
+                SELECT is_verified, verification_expires_at
+                FROM users
+                WHERE verification_token_hash = $1
+                """,
+                token_hash,
+            )
+
+            if row is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid verification token",
+                )
+
+            if row["is_verified"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Account is already verified",
+                )
+
+            if row["verification_expires_at"] <= now:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Verification token has expired",
+                )
+
+            await conn.execute(
                 """
                 UPDATE users
                 SET is_verified              = TRUE,
@@ -32,11 +61,8 @@ class VerifyService:
                     verification_expires_at  = NULL,
                     updated_at               = NOW()
                 WHERE verification_token_hash = $1
-                  AND verification_expires_at  > $2
-                  AND is_verified              = FALSE
                 """,
                 token_hash,
-                now,
             )
 
-        return result
+        return True

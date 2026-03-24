@@ -14,7 +14,7 @@ interface VerifyAccountState {
     setEmail: (email: string) => void;
     setEmailFromUrl: (email: string) => void;
     clearEmailError: () => void;
-    resend: () => void;
+    resend: (from: 'expired' | 'login') => void;
     reset: () => void;
 }
 
@@ -35,7 +35,7 @@ export const useVerifyAccountStore = create<VerifyAccountState>((set, get) => ({
     clearEmailError: () => set({ emailError: '' }),
     reset: () => set(initialState),
 
-    resend: () => {
+    resend: (from: 'expired' | 'login') => {
         const { email } = get();
 
         if (!email.trim()) {
@@ -54,7 +54,11 @@ export const useVerifyAccountStore = create<VerifyAccountState>((set, get) => ({
                 set({ resendLoading: false, resendSent: true });
             })
             .catch(() => {
-                set({ resendLoading: false, emailError: 'Failed to resend verification email. Please try again.' });
+                if (from === 'login') {
+                    set({ resendLoading: false, resendSent: true });
+                } else {
+                    set({ resendLoading: false, emailError: 'Failed to resend verification email. Please try again.' });
+                }
             });
     },
 }));
