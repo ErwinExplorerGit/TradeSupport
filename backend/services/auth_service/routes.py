@@ -4,6 +4,7 @@ from config.database import get_pool
 from utils.bcrypt_utils import hash_password
 from .login import LoginRequest, LoginResponse, login as _login, LoginService
 from .registration import RegisterRequest, RegisterResponse, register as _register, RegistrationService
+from .verify import VerifyRequest, VerifyResponse, verify as _verify, VerifyService
 from .verify_resend import VerifyResendRequest, VerifyResendResponse, verify_resend as _verify_resend, VerifyResendService
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -34,3 +35,9 @@ async def register(request: RegisterRequest):
 async def verify_resend(request: VerifyResendRequest):
     service = VerifyResendService(get_pool())
     return await _verify_resend(request, service)
+
+
+@router.post("/verify", response_model=VerifyResponse)
+async def verify(request: VerifyRequest):
+    service = VerifyService(get_pool())
+    return await _verify(request, service)
