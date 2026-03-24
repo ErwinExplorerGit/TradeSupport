@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { authService } from "../../../../services/auth";
 import { useVerifyAccountStore } from "../../../../stores/verifyAccountStore";
+import VerifyingCard from "../../../../components/verifying_card";
 
 export default function Verifying() {
   const [searchParams] = useSearchParams();
@@ -16,31 +17,22 @@ export default function Verifying() {
       return;
     }
 
-    authService.verify({ token }).then(
-      () => {
-        if (!cancelled) setVerifyState("success");
-      },
-      () => {
-        if (!cancelled) setVerifyState("failed");
-      },
-    );
+    const timer = setTimeout(() => {
+      authService.verify({ token }).then(
+        () => {
+          if (!cancelled) setVerifyState("success");
+        },
+        () => {
+          if (!cancelled) setVerifyState("failed");
+        },
+      );
+    }, 3000);
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [token]);
 
-  return (
-    <>
-      <div className="verify-spinner">
-        <div className="verify-spinner-ring" />
-      </div>
-      <div className="verify-card-header">
-        <h1 className="verify-card-title">Verifying your account</h1>
-        <p className="verify-card-subtitle">
-          Account being verified, please wait…
-        </p>
-      </div>
-    </>
-  );
+  return <VerifyingCard />;
 }

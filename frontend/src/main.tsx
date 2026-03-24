@@ -12,6 +12,7 @@ import NotFoundPage from "./pages/not_found/index.tsx";
 import RegisterPage from "./pages/register/index.tsx";
 import VerifyPasswordPage from "./pages/verify_account/index.tsx";
 import "./styles.scss";
+import ResetPasswordPage from "./pages/reset_password/index.tsx";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/verify-account" element={<VerifyPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
 
           {/* Protected routes: redirect to /login when not authenticated */}

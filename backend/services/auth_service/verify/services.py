@@ -23,6 +23,9 @@ class VerifyService:
         Returns True if the account was successfully verified.
         """
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+
+        print(f"Verifying token: {raw_token} (hash: {token_hash})")  # Debug log
+
         now = datetime.now(timezone.utc)
 
         async with self._pool.acquire() as conn:
