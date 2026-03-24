@@ -5,6 +5,7 @@ function ConfirmPassword() {
   const confirmPassword = useRegisterStore((s) => s.confirmPassword);
   const error = useRegisterStore((s) => s.errors.confirmPassword);
   const setConfirmPassword = useRegisterStore((s) => s.setConfirmPassword);
+  const loading = useRegisterStore((s) => s.loading);
 
   return (
     <Input
@@ -16,6 +17,7 @@ function ConfirmPassword() {
       placeholder="Re-enter your password"
       autoComplete="new-password"
       error={error}
+      disabled={loading}
     />
   );
 }

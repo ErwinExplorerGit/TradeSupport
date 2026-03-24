@@ -5,6 +5,7 @@ function FirstName() {
   const firstName = useRegisterStore((s) => s.firstName);
   const error = useRegisterStore((s) => s.errors.firstName);
   const setFirstName = useRegisterStore((s) => s.setFirstName);
+  const loading = useRegisterStore((s) => s.loading);
 
   return (
     <Input
@@ -15,6 +16,7 @@ function FirstName() {
       placeholder="John"
       autoComplete="given-name"
       error={error}
+      disabled={loading}
     />
   );
 }
