@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { isEmail } from '../utils';
+import { authService } from '../services/auth';
 
 interface RegisterErrors {
     firstName?: string;
@@ -23,15 +24,15 @@ interface RegisterState {
     setPassword: (password: string) => void;
     setConfirmPassword: (confirmPassword: string) => void;
     reset: () => void;
-    submit: (onSuccess: () => void) => void;
+    submit: (onSuccess: () => void) => Promise<void>;
 }
 
 const initialState = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    firstName: 'erwin',
+    lastName: 'alapide',
+    email: 'erwinalapide.ca@gmail.com',
+    password: '12345678',
+    confirmPassword: '12345678',
     loading: false,
     errors: {},
 };
@@ -47,7 +48,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
 
     reset: () => set(initialState),
 
-    submit: (onSuccess) => {
+    submit: async (onSuccess) => {
         const { firstName, lastName, email, password, confirmPassword } = get();
         const errors: RegisterErrors = {};
 
@@ -76,11 +77,21 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
 
         set({ loading: true, errors: {} });
 
-        // API call will go here
-        setTimeout(() => {
-            set({ loading: false, firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+        try {
+            await authService.register({
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                email: email.trim(),
+                password,
+            });
+            set(initialState);
             onSuccess();
-        }, 1000);
+        } catch (err) {
+            set({
+                loading: false,
+                errors: { email: err instanceof Error ? err.message : 'Registration failed. Please try again.' },
+            });
+        }
     },
 }));
 

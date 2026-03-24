@@ -5,6 +5,7 @@ function LastName() {
   const lastName = useRegisterStore((s) => s.lastName);
   const error = useRegisterStore((s) => s.errors.lastName);
   const setLastName = useRegisterStore((s) => s.setLastName);
+  const loading = useRegisterStore((s) => s.loading);
 
   return (
     <Input
@@ -15,6 +16,7 @@ function LastName() {
       placeholder="Doe"
       autoComplete="family-name"
       error={error}
+      disabled={loading}
     />
   );
 }
