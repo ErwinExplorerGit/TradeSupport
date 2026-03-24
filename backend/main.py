@@ -4,11 +4,19 @@ from pathlib import Path
 import logging
 from contextlib import asynccontextmanager
 
+# Load environment variables before any config/service imports so that
+# module-level config objects (e.g. SMTPConfig, database DSN) read the
+# correct values from .env on first access.
+_env_path = Path(__file__).resolve().parent / ".env"
+print(f"Loading environment variables from: {_env_path}")
+load_dotenv(dotenv_path=_env_path)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import database
 from config.database import init_db, close_db
+from config.smtp import init_smtp
 
 # Import services
 from services.trading_service import TradingService, router as trading_router
@@ -23,11 +31,6 @@ from services.health_service import router as health_router, set_health_callback
 """
 FastAPI backend for TradingAgent real-time streaming.
 """
-
-# Load environment variables from .env file
-env_path = Path(__file__).resolve().parent / ".env"
-print(f"Loading environment variables from: {env_path}")
-load_dotenv(dotenv_path=env_path)
 
 # Configure logging
 logging.basicConfig(
@@ -60,6 +63,9 @@ async def lifespan(app: FastAPI):
 
     # Initialise database connection pool
     await init_db()
+
+    # Validate SMTP configuration
+    init_smtp()
 
     yield
 

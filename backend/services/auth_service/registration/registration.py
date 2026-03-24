@@ -3,7 +3,8 @@ from pydantic import BaseModel, field_validator
 import logging
 
 from utils.email_utils import is_valid_email
-from .services import RegistrationService
+from utils.send_email import send_email
+from .services import RegistrationService, _APP_URL, _VERIFY_EXPIRY_HOURS
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +52,24 @@ async def register(request: RegisterRequest, registration_service: RegistrationS
         logger.warning(f"Registration attempt for existing email: {request.email}")
         raise HTTPException(status_code=409, detail="Email already registered")
 
-    user_id = await registration_service.register_user(
+    user_id, raw_token = await registration_service.register_user(
         request.first_name,
         request.last_name,
         request.email,
         request.password,
     )
     logger.info(f"Registered new user: {request.email} (id={user_id})")
+
+    verification_url = f"{_APP_URL}/verify-email?token={raw_token}"
+    await send_email(
+        to=request.email,
+        subject="Verify your TradeSupport account",
+        template="verify_account.html",
+        context={
+            "first_name": request.first_name,
+            "verification_url": verification_url,
+            "expiry_hours": _VERIFY_EXPIRY_HOURS,
+        },
+    )
+
     return RegisterResponse(message="registered", user_id=user_id, email=request.email)

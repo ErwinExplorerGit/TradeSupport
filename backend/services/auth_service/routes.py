@@ -7,6 +7,7 @@ from .registration import RegisterRequest, RegisterResponse, register as _regist
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+
 # In-memory user store for login (mock) — seeded with demo accounts
 _users: dict[str, str] = {
     "admin": hash_password("admin123"),

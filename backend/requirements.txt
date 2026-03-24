@@ -35,3 +35,4 @@ websockets
 python-multipart
 asyncpg
 bcrypt
+aiosmtplib
