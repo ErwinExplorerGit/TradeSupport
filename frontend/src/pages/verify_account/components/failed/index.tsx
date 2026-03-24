@@ -16,7 +16,7 @@ export default function Failed() {
 
   const handleResend = (e: React.FormEvent) => {
     e.preventDefault();
-    resend();
+    resend("expired");
   };
 
   return (

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { authService } from '../services/auth';
 import { isEmail } from '../utils';
 
 export type VerifyState = 'verifying' | 'success' | 'failed' | 'resend';
@@ -13,7 +14,7 @@ interface VerifyAccountState {
     setEmail: (email: string) => void;
     setEmailFromUrl: (email: string) => void;
     clearEmailError: () => void;
-    resend: () => void;
+    resend: (from: 'expired' | 'login') => void;
     reset: () => void;
 }
 
@@ -34,7 +35,7 @@ export const useVerifyAccountStore = create<VerifyAccountState>((set, get) => ({
     clearEmailError: () => set({ emailError: '' }),
     reset: () => set(initialState),
 
-    resend: () => {
+    resend: (from: 'expired' | 'login') => {
         const { email } = get();
 
         if (!email.trim()) {
@@ -48,9 +49,16 @@ export const useVerifyAccountStore = create<VerifyAccountState>((set, get) => ({
 
         set({ emailError: '', resendLoading: true });
 
-        // Mock resend — resolve after 1.5 s
-        setTimeout(() => {
-            set({ resendLoading: false, resendSent: true });
-        }, 1500);
+        authService.verifyResend({ email })
+            .then(() => {
+                set({ resendLoading: false, resendSent: true });
+            })
+            .catch(() => {
+                if (from === 'login') {
+                    set({ resendLoading: false, resendSent: true });
+                } else {
+                    set({ resendLoading: false, emailError: 'Failed to resend verification email. Please try again.' });
+                }
+            });
     },
 }));

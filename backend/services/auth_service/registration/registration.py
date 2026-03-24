@@ -60,7 +60,7 @@ async def register(request: RegisterRequest, registration_service: RegistrationS
     )
     logger.info(f"Registered new user: {request.email} (id={user_id})")
 
-    verification_url = f"{_APP_URL}/verify-email?token={raw_token}"
+    verification_url = f"{_APP_URL}/verify-account?token={raw_token}"
     await send_email(
         to=request.email,
         subject="Verify your TradeSupport account",
