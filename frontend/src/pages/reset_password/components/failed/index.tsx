@@ -1,35 +1,29 @@
-import { IoArrowBackSharp, IoCloseCircleOutline } from "react-icons/io5";
-import { Link } from "react-router";
+import { useSearchParams } from "react-router";
 import { useResetPasswordStore } from "../../../../stores/resetPasswordStore";
+import FailedIcon from "./components/FailedIcon";
+import FailedHeader from "./components/FailedHeader";
+import ResendAction from "./components/ResendAction";
+import FailedFooter from "./components/FailedFooter";
 
 export default function Failed() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const reset = useResetPasswordStore((s) => s.reset);
+  const resendState = useResetPasswordStore((s) => s.resendState);
+  const resendByToken = useResetPasswordStore((s) => s.resendByToken);
+
+  const handleResend = () => {
+    if (token) {
+      resendByToken(token);
+    }
+  };
 
   return (
     <>
-      <div className="reset-icon reset-icon--error">
-        <IoCloseCircleOutline size={32} />
-      </div>
-      <div className="reset-card-header">
-        <h1 className="reset-card-title">Link expired</h1>
-        <p className="reset-card-subtitle">
-          This password reset link has expired or is no longer valid. Please
-          request a new one.
-        </p>
-      </div>
-      <Link
-        to="/forgot-password"
-        className="reset-btn reset-btn--primary"
-        onClick={reset}
-      >
-        Request new link
-      </Link>
-      <div className="reset-footer">
-        <Link to="/login" className="reset-back-link" onClick={reset}>
-          <IoArrowBackSharp size={16} />
-          Back to sign in
-        </Link>
-      </div>
+      <FailedIcon />
+      <FailedHeader />
+      <ResendAction resendState={resendState} onResend={handleResend} />
+      <FailedFooter onReset={reset} />
     </>
   );
 }

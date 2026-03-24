@@ -110,6 +110,30 @@
 
 // ── Footer ─────────────────────────────────────────────────────────────────────
 
+// ── Resend success banner ──────────────────────────────────────────────────────
+
+.reset-success {
+  background: #f0faf4;
+  border: 1px solid #a8dfc0;
+  border-radius: $border-radius-sm;
+  color: #1e6e42;
+  font-size: 0.875rem;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  line-height: 1.5;
+  width: 100%;
+  margin-bottom: 0.25rem;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
 .reset-footer {
   margin-top: 1.25rem;
   width: 100%;
