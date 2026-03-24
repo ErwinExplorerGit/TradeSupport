@@ -1,0 +1,156 @@
+@use '../../styles' as *;
+
+.reset-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, $color-navy-deeper 0%, $color-navy 60%, $color-navy-dark 100%);
+}
+
+.reset-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.reset-card {
+  background: $color-white;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+// ── Status Icon ────────────────────────────────────────────────────────────────
+
+.reset-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+
+  &--success {
+    background: rgba(#27ae60, 0.1);
+    color: #27ae60;
+  }
+
+  &--error {
+    background: rgba($color-red, 0.1);
+    color: $color-red;
+  }
+}
+
+// ── Card Header ────────────────────────────────────────────────────────────────
+
+.reset-card-header {
+  margin-bottom: 1.75rem;
+  width: 100%;
+}
+
+.reset-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 0.5rem;
+}
+
+.reset-card-subtitle {
+  font-size: 0.9rem;
+  color: $color-text-muted;
+  line-height: 1.65;
+}
+
+// ── Form ───────────────────────────────────────────────────────────────────────
+
+.reset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+// ── Button ─────────────────────────────────────────────────────────────────────
+
+.reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: $border-radius-sm;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: background $transition-fast, opacity $transition-fast;
+
+  &--primary {
+    background: $color-navy;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background: $color-navy-dark;
+    }
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+// ── Resend success banner ──────────────────────────────────────────────────────
+
+.reset-success {
+  background: #f0faf4;
+  border: 1px solid #a8dfc0;
+  border-radius: $border-radius-sm;
+  color: #1e6e42;
+  font-size: 0.875rem;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  line-height: 1.5;
+  width: 100%;
+  margin-bottom: 0.25rem;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+.reset-footer {
+  margin-top: 1.25rem;
+  width: 100%;
+  text-align: center;
+}
+
+.reset-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-text-muted;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-text-primary;
+  }
+}

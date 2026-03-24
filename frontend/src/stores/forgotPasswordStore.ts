@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { isEmail } from '../utils';
+import { authService } from '../services/auth';
 
 interface ForgotPasswordState {
     email: string;
@@ -13,7 +14,7 @@ interface ForgotPasswordState {
 }
 
 const initialState = {
-    email: '',
+    email: 'erwinalapide.ca@gmail.com',
     emailError: '',
     loading: false,
     submitted: false,
@@ -41,9 +42,14 @@ export const useForgotPasswordStore = create<ForgotPasswordState>((set, get) => 
 
         set({ loading: true, emailError: '' });
 
-        // API call will go here
         setTimeout(() => {
-            set({ loading: false, submitted: true });
-        }, 1000);
+            authService.forgotPassword({ email })
+                .then(() => {
+                    set({ loading: false, submitted: true });
+                })
+                .catch(() => {
+                    set({ loading: false, submitted: true });
+                });
+        }, 3000);
     },
 }));
