@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { authService } from '../services/auth';
 import { isEmail } from '../utils';
 
 export type VerifyState = 'verifying' | 'success' | 'failed' | 'resend';
@@ -48,9 +49,12 @@ export const useVerifyAccountStore = create<VerifyAccountState>((set, get) => ({
 
         set({ emailError: '', resendLoading: true });
 
-        // Mock resend — resolve after 1.5 s
-        setTimeout(() => {
-            set({ resendLoading: false, resendSent: true });
-        }, 1500);
+        authService.verifyResend({ email })
+            .then(() => {
+                set({ resendLoading: false, resendSent: true });
+            })
+            .catch(() => {
+                set({ resendLoading: false, emailError: 'Failed to resend verification email. Please try again.' });
+            });
     },
 }));
