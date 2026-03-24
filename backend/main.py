@@ -13,8 +13,7 @@ from config.database import init_db, close_db
 # Import services
 from services.trading_service import TradingService, router as trading_router
 from services.trading_service.routes import set_trading_service, set_broadcast_callbacks
-from services.auth_service import AuthService, router as auth_router
-from services.auth_service.routes import set_auth_service
+from services.auth_service import router as auth_router
 from services.history_service import HistoryService, router as history_router
 from services.history_service.routes import set_history_service
 from services.socket_service import router as socket_router, broadcast_status, broadcast_log
@@ -40,7 +39,6 @@ logger = logging.getLogger(__name__)
 
 # Initialize services
 trading_service = TradingService()
-auth_service = AuthService()
 history_service = HistoryService()
 
 
@@ -52,7 +50,6 @@ async def lifespan(app: FastAPI):
 
     # Initialize services
     set_trading_service(trading_service)
-    set_auth_service(auth_service)
     set_history_service(history_service)
     set_broadcast_callbacks(broadcast_status, broadcast_log)
     set_health_callbacks(
@@ -91,8 +88,9 @@ app.add_middleware(
 )
 
 # Include service routers
-app.include_router(trading_router)
 app.include_router(auth_router)
+
+app.include_router(trading_router)
 app.include_router(history_router)
 app.include_router(socket_router)
 app.include_router(health_router)
