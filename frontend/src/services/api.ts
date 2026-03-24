@@ -1,4 +1,4 @@
-import { AnalysisRequest, ApiConfig, HealthCheckResponse, LoginRequest, LoginResponse } from '../types';
+import { AnalysisRequest, ApiConfig, HealthCheckResponse } from '../types';
 import { axiosInstance } from '../axios';
 import { authService } from './auth';
 
@@ -33,14 +33,6 @@ export const api = {
    */
   async getConfig(): Promise<ApiConfig> {
     const { data } = await axiosInstance.get<ApiConfig>('/api/trading/config');
-    return data;
-  },
-
-  /**
-   * Authenticate a user with username and password
-   */
-  async login(request: LoginRequest): Promise<LoginResponse> {
-    const { data } = await axiosInstance.post<LoginResponse>('/api/auth/login', request);
     return data;
   },
 };

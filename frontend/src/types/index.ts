@@ -82,14 +82,3 @@ export interface HealthCheckResponse {
   trading_mode: string;
   active_connections: number;
 }
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  message: string;
-  username: string;
-}
-

@@ -15,8 +15,8 @@ interface LoginState {
 }
 
 const initialState = {
-    username: '',
-    password: '',
+    username: 'erwinalapide.ca@gmail.com',
+    password: '12345678',
     loading: false,
     error: '',
 };
@@ -39,11 +39,13 @@ export const useLoginStore = create<LoginState>((set, get) => ({
 
         set({ loading: true, error: '' });
 
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
         try {
             const res = await api.login({ username: username.trim(), password });
             useAuthStore.getState().setAuth(
-                { id: res.username, email: '', username: res.username },
-                '',
+                { id: res.user_id, email: res.email, username: res.first_name + ' ' + res.last_name },
+                res.access_token,
             );
             set(initialState);
             onSuccess();
