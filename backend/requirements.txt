@@ -36,3 +36,4 @@ python-multipart
 asyncpg
 bcrypt
 aiosmtplib
+PyJWT

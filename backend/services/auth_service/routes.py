@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from config.database import get_pool
-from utils.bcrypt_utils import hash_password
 from .login import LoginRequest, LoginResponse, login as _login, LoginService
 from .registration import RegisterRequest, RegisterResponse, register as _register, RegistrationService
 from .verify import VerifyRequest, VerifyResponse, verify as _verify, VerifyService
@@ -13,19 +12,10 @@ from .reset_password import ResetPasswordRequest, ResetPasswordResponse, reset_p
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-# In-memory user store for login (mock) — seeded with demo accounts
-_users: dict[str, str] = {
-    "admin": hash_password("admin123"),
-    "user": hash_password("user123"),
-    "demo": hash_password("demo123"),
-}
-
-_login_service = LoginService(_users)
-
-
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
-    return await _login(request, _login_service)
+    service = LoginService(get_pool())
+    return await _login(request, service)
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=201)
