@@ -16,7 +16,7 @@ class VerifyPasswordResetResponse(BaseModel):
     message: str
 
 
-async def verify_password_reset(
+async def verify_reset_password_token(
     request: VerifyPasswordResetRequest,
     service: VerifyPasswordResetService,
 ) -> VerifyPasswordResetResponse:

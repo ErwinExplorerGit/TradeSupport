@@ -1,9 +1,9 @@
-from .verify_password_reset import VerifyPasswordResetRequest, VerifyPasswordResetResponse, verify_password_reset
+from .verify_reset_password_token import VerifyPasswordResetRequest, VerifyPasswordResetResponse, verify_reset_password_token
 from .services import VerifyPasswordResetService
 
 __all__ = [
     "VerifyPasswordResetRequest",
     "VerifyPasswordResetResponse",
-    "verify_password_reset",
+    "verify_reset_password_token",
     "VerifyPasswordResetService",
 ]

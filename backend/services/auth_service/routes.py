@@ -7,7 +7,7 @@ from .registration import RegisterRequest, RegisterResponse, register as _regist
 from .verify import VerifyRequest, VerifyResponse, verify as _verify, VerifyService
 from .verify_resend import VerifyResendRequest, VerifyResendResponse, verify_resend as _verify_resend, VerifyResendService
 from .forgot_password import ForgotPasswordRequest, ForgotPasswordResponse, forgot_password as _forgot_password, ForgotPasswordService
-from .verify_password_reset import VerifyPasswordResetRequest, VerifyPasswordResetResponse, verify_password_reset as _verify_password_reset, VerifyPasswordResetService
+from .verify_reset_password_token import VerifyPasswordResetRequest, VerifyPasswordResetResponse, verify_reset_password_token as _verify_reset_password_token, VerifyPasswordResetService
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -51,7 +51,7 @@ async def forgot_password(request: ForgotPasswordRequest):
     return await _forgot_password(request, service)
 
 
-@router.post("/verify-password-reset", response_model=VerifyPasswordResetResponse)
-async def verify_password_reset(request: VerifyPasswordResetRequest):
+@router.post("/verify_reset_password_token", response_model=VerifyPasswordResetResponse)
+async def verify_reset_password_token(request: VerifyPasswordResetRequest):
     service = VerifyPasswordResetService(get_pool())
-    return await _verify_password_reset(request, service)
+    return await _verify_reset_password_token(request, service)
