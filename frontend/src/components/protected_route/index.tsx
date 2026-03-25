@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "../../stores/authStore";
+import { Topbar } from "../layout";
 
 /**
  * Wraps routes that require authentication.
@@ -12,5 +13,10 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <div className="app">
+      <Topbar />
+      <Outlet />
+    </div>
+  );
 }
