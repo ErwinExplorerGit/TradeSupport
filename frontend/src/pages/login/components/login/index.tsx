@@ -16,7 +16,7 @@ function LoginForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submit(() => navigate("/analyze"));
+    submit(() => navigate("/dashboard"));
   };
 
   return (
