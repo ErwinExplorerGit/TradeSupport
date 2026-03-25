@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { FiTrendingUp, FiClock, FiUser, FiZap } from "react-icons/fi";
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore } from "@/stores";
 import "./styles.scss";
 
 const QUICK_ACTIONS = [

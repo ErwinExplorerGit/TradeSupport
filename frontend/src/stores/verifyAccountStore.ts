@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { authService } from '../services/auth';
-import { isEmail } from '../utils';
+import { authService } from '@/services/auth';
+import { isEmail } from '@/utils';
 
 export type VerifyState = 'verifying' | 'success' | 'failed' | 'resend';
 

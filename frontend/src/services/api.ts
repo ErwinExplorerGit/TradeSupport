@@ -1,5 +1,5 @@
-import { AnalysisRequest, ApiConfig, HealthCheckResponse, HistoryResponse, TickerSuggestion } from '../types';
-import { axiosInstance } from '../axios';
+import { AnalysisRequest, ApiConfig, HealthCheckResponse, HistoryResponse, TickerSuggestion } from '@/types';
+import { axiosInstance } from '@/axios';
 import { authService } from './auth';
 
 export const api = {

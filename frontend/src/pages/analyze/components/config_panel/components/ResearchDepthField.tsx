@@ -1,5 +1,5 @@
-import { Dropdown } from "../../../../../components";
-import { ResearchDepth, DepthOption } from "../../../../../types";
+import { Dropdown } from "@/components";
+import { ResearchDepth, DepthOption } from "@/types";
 
 const depthMap: Record<number, ResearchDepth> = {
   1: "quick",

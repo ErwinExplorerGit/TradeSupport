@@ -11,11 +11,11 @@ import {
   FiX,
   FiFileText,
 } from "react-icons/fi";
-import { api } from "../../services/api";
-import { HistoryRecord, TickerSuggestion } from "../../types";
+import { api } from "@/services/api";
+import { HistoryRecord, TickerSuggestion } from "@/types";
 import "./styles.scss";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 6;
 
 const SIGNAL_RE = /\b(BUY|SELL|HOLD)\b/i;
 
@@ -346,11 +346,6 @@ export default function HistoryPage() {
           <button className="history-search-btn" onClick={handleSearch}>
             Search
           </button>
-          {activeFilter && (
-            <button className="history-clear-btn" onClick={handleClear}>
-              Clear
-            </button>
-          )}
         </div>
 
         {activeFilter && (
@@ -421,7 +416,7 @@ export default function HistoryPage() {
                             )}
                           </span>
                         ) : (
-                          formatDate(record.scanned_at)
+                          "—"
                         )}
                       </td>
                       <td>
@@ -443,27 +438,25 @@ export default function HistoryPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="history-pagination">
-                <button
-                  className="history-page-btn"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  <FiChevronLeft />
-                </button>
-                <span className="history-page-info">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  className="history-page-btn"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                >
-                  <FiChevronRight />
-                </button>
-              </div>
-            )}
+            <div className="history-pagination">
+              <button
+                className="history-page-btn"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <FiChevronLeft />
+              </button>
+              <span className="history-page-info">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                className="history-page-btn"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                <FiChevronRight />
+              </button>
+            </div>
           </>
         )}
       </div>

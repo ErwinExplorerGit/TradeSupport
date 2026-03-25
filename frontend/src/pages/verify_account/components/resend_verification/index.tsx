@@ -1,7 +1,7 @@
 import { IoArrowBackSharp, IoMailOutline } from "react-icons/io5";
 import { Link } from "react-router";
-import { Button } from "../../../../components";
-import { useVerifyAccountStore } from "../../../../stores/verifyAccountStore";
+import { Button } from "@/components";
+import { useVerifyAccountStore } from "@/stores";
 
 export default function ResendVerification() {
   const email = useVerifyAccountStore((s) => s.email);

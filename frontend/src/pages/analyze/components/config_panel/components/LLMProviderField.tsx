@@ -1,5 +1,5 @@
-import { Dropdown } from "../../../../../components";
-import { LLMProvider, ProviderOption } from "../../../../../types";
+import { Dropdown } from "@/components";
+import { LLMProvider, ProviderOption } from "@/types";
 
 interface LLMProviderFieldProps {
   value: LLMProvider;

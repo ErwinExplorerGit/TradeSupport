@@ -1,11 +1,14 @@
 @use '../../styles' as *;
 
 .history-page {
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   background: $color-bg-light;
   padding: 2.5rem 1.5rem;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .history-container {

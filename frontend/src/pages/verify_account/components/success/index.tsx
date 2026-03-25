@@ -1,6 +1,6 @@
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { Link } from "react-router";
-import { useVerifyAccountStore } from "../../../../stores";
+import { useVerifyAccountStore } from "@/stores";
 
 export default function Success() {
   const reset = useVerifyAccountStore((s) => s.reset);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FiSearch, FiX } from "react-icons/fi";
-import { api } from "../../../../../services/api";
-import { TickerSuggestion } from "../../../../../types";
+import { api } from "@/services/api";
+import { TickerSuggestion } from "@/types";
 
 interface TickerFieldProps {
   value: string[];
@@ -21,7 +21,7 @@ export const TickerField = ({
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<number | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selected = value[0] ?? null;
 

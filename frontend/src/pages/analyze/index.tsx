@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { ConfigPanel } from "./components/config_panel";
 import { AnalysisProgress } from "./components/AnalysisProgress";
-import { useWebSocket } from "../../hooks/useWebSocket";
-import { api } from "../../services/api";
-import { ConfigFormData, ApiConfig, ResearchDepth } from "../../types";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { api } from "@/services/api";
+import { ConfigFormData, ApiConfig, ResearchDepth } from "@/types";
 import "./styles.scss";
 
 const depthToValue: Record<ResearchDepth, number> = {

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../services/api';
+import { api } from '@/services/api';
 import { useAuthStore } from './authStore';
 
 interface LoginState {
@@ -20,8 +20,8 @@ interface LoginState {
 }
 
 const initialState = {
-    username: 'erwinalapide.ca@gmail.com',
-    password: '12345678',
+    username: '',
+    password: '',
     loading: false,
     error: '',
     unverified: false,

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router";
-import { useVerifyAccountStore } from "../../stores/verifyAccountStore";
+import { useVerifyAccountStore } from "@/stores";
 import Failed from "./components/failed";
 import ResendVerification from "./components/resend_verification";
 import Success from "./components/success";

@@ -1,4 +1,4 @@
-import { ConfigFormData } from "../../../../../types";
+import { ConfigFormData } from "@/types";
 
 interface AnalystsFieldProps {
   analysts: ConfigFormData["analysts"];

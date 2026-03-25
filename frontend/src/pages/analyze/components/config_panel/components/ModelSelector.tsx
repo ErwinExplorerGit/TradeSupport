@@ -1,5 +1,5 @@
-import { Dropdown } from "../../../../../components";
-import { ModelOption } from "../../../../../types";
+import { Dropdown } from "@/components";
+import { ModelOption } from "@/types";
 
 interface ModelSelectorProps {
   shallowModel: string;

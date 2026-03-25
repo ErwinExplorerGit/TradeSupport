@@ -1,4 +1,4 @@
-import { useResetPasswordStore } from "../../../../stores/resetPasswordStore";
+import { useResetPasswordStore } from "@/stores";
 import FormHeader from "./components/FormHeader";
 import LoginAction from "./components/LoginAction";
 import PasswordForm from "./components/PasswordForm";

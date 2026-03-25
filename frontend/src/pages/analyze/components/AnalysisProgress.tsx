@@ -11,7 +11,7 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
-import { TickerProgress, AnalysisState } from "../../../types";
+import { TickerProgress, AnalysisState } from "@/types";
 
 interface AnalysisProgressProps {
   tickerProgress: Record<string, TickerProgress>;

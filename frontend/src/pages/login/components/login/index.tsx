@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
-import { Button, Input } from "../../../../components";
-import { useLoginStore } from "../../../../stores";
+import { Button, Input } from "@/components";
+import { useLoginStore } from "@/stores";
 
 function LoginForm() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ApiConfig, AnalysisState } from '../types';
+import { ApiConfig, AnalysisState } from '@/types';
 
 interface AnalysisStore {
     config: ApiConfig | null;

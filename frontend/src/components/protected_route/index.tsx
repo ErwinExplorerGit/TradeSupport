@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuthStore } from "../../stores/authStore";
-import { Topbar } from "../layout";
+import { useAuthStore } from "@/stores/authStore";
+import { Topbar } from "@/components/layout";
 
 /**
  * Wraps routes that require authentication.

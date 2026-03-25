@@ -4,15 +4,17 @@ import {
   IoMailOutline,
 } from "react-icons/io5";
 import { Link } from "react-router";
-import { useVerifyAccountStore } from "../../../../stores/verifyAccountStore";
-import ResendButton from "./components/button";
-import Email from "./components/email";
+import { Button, Input } from "@/components";
+import { useVerifyAccountStore } from "@/stores";
 
 export default function Failed() {
   const email = useVerifyAccountStore((s) => s.email);
+  const emailError = useVerifyAccountStore((s) => s.emailError);
+  const resendLoading = useVerifyAccountStore((s) => s.resendLoading);
   const resendSent = useVerifyAccountStore((s) => s.resendSent);
   const resend = useVerifyAccountStore((s) => s.resend);
   const reset = useVerifyAccountStore((s) => s.reset);
+  const setEmail = useVerifyAccountStore((s) => s.setEmail);
 
   const handleResend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +44,20 @@ export default function Failed() {
         </div>
       ) : (
         <form className="verify-form" onSubmit={handleResend} noValidate>
-          <Email />
-          <ResendButton />
+          <Input
+            id="verify-email"
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            placeholder="you@example.com"
+            autoComplete="email"
+            disabled={resendLoading}
+            error={emailError}
+          />
+          <Button type="submit" loading={resendLoading}>
+            Resend verification email
+          </Button>
         </form>
       )}
 

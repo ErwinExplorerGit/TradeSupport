@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { authService } from '../services/auth';
+import { authService } from '@/services/auth';
 
 export type VerifyState = 'verifying' | 'success' | 'failed';
 export type ResendState = 'idle' | 'loading' | 'sent';

@@ -1,4 +1,4 @@
-export default function VerifyingCard() {
+export function VerifyingCard() {
   return (
     <>
       <div className="verify-spinner">

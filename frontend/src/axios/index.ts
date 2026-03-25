@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { authRoutes } from '../services/auth/routes';
+import { authRoutes } from '@/services/auth/routes';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
@@ -70,7 +70,7 @@ axiosInstance.interceptors.response.use(
                 // Refresh token is stored as an HTTP-only cookie — no body needed
                 const { data } = await axiosInstance.post<{ access_token: string }>(authRoutes.refresh);
 
-                const { useAuthStore } = await import('../stores/authStore');
+                const { useAuthStore } = await import('@/stores/authStore');
                 const { user } = useAuthStore.getState();
                 if (user) {
                     useAuthStore.getState().setAuth(user, data.access_token);
@@ -85,7 +85,7 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
                 processPendingQueue(refreshError, null);
-                const { useAuthStore } = await import('../stores/authStore');
+                const { useAuthStore } = await import('@/stores/authStore');
                 useAuthStore.getState().clearAuth();
                 return Promise.reject(new Error('Session expired. Please log in again.'));
             } finally {

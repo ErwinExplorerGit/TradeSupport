@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router";
-import VerifyingCard from "../../../../components/verifying_card";
-import { authService } from "../../../../services/auth";
-import { useResetPasswordStore } from "../../../../stores/resetPasswordStore";
+import { VerifyingCard } from "@/components";
+import { authService } from "@/services/auth";
+import { useResetPasswordStore } from "@/stores";
 
 export default function Verifying() {
   const [searchParams] = useSearchParams();
