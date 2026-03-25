@@ -15,7 +15,6 @@ export interface LoginResponse {
   first_name: string;
   last_name: string;
   access_token: string;
-  refresh_token: string;
 }
 
 export async function login(request: LoginRequest): Promise<LoginResponse> {
@@ -120,6 +119,22 @@ export async function resetPassword(request: ResetPasswordRequest): Promise<Rese
   return data;
 }
 
+// ─── Change Password ──────────────────────────────────────────────────────────
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
+
+export async function changePassword(request: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+  const { data } = await axiosInstance.post<ChangePasswordResponse>(authRoutes.changePassword, request);
+  return data;
+}
+
 // ─── Auth Service ─────────────────────────────────────────────────────────────
 
 export const authService = {
@@ -130,5 +145,6 @@ export const authService = {
   forgotPassword,
   verifyResetPasswordToken,
   resetPassword,
+  changePassword,
 };
 

@@ -21,6 +21,11 @@ PUBLIC_ROUTE_PREFIXES: tuple[str, ...] = (
     "/api/auth/forgot-password",
     "/api/auth/verify-reset-password-token",
     "/api/auth/reset-password",
+    "/api/auth/refresh",
+    # Documentation routes (if enabled)
+    "/docs",
+    "/openapi.json",
+    "/redoc",
 )
 
 
@@ -54,6 +59,12 @@ class Middleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        print(f"Incoming request: {request.method} {request.url.path}")
+
+        if request.method == "OPTIONS":
+            # Handle CORS preflight requests without authentication
+            return await call_next(request)
+
         if _is_public_route(request.url.path):
             return await call_next(request)
 
@@ -81,7 +92,7 @@ class Middleware(BaseHTTPMiddleware):
             # Decode and validate the token
             payload = decode_access_token(token)
 
-            # request.state.user = payload
+            request.state.user = payload
 
         except jwt.ExpiredSignatureError:
             logger.warning("Rejected request to %s: token expired", request.url.path)

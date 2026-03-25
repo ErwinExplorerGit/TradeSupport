@@ -5,3 +5,4 @@ export { useLoginStore } from './loginStore';
 export { useRegisterStore } from './registerStore';
 export { useVerifyAccountStore } from './verifyAccountStore';
 export { useResetPasswordStore } from './resetPasswordStore';
+export { useAccountStore } from './accountStore';

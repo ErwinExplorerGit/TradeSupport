@@ -19,7 +19,6 @@ class LoginResponse(BaseModel):
     first_name: str
     last_name: str
     access_token: str
-    refresh_token: str
 
 
 async def login(request: LoginRequest, login_service: LoginService) -> LoginResponse:
