@@ -1,0 +1,15 @@
+// ── Topbar nav-link active state ───────────────────────────────────────────────
+.nav-link--active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+// ── Logout button reset ────────────────────────────────────────────────────────
+.nav-link--logout {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
