@@ -1,4 +1,4 @@
-from .analysis_request import AnalysisRequest
+from .analysis_request import AnalysisRequest, AnalysisBatchRequest
 from .analysis_response import AnalysisResponse
 from .analysis_state import AnalysisState
 from .analyst_config import AnalystConfig

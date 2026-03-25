@@ -12,7 +12,8 @@ const depthToValue: Record<ResearchDepth, number> = {
 };
 
 export default function AnalyzePage() {
-  const { isConnected, messages, state, clearMessages } = useWebSocket();
+  const { isConnected, messages, state, tickerProgress, clearMessages } =
+    useWebSocket();
   const [error, setError] = useState<string | null>(null);
   const [config, setConfig] = useState<ApiConfig | null>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
@@ -34,7 +35,6 @@ export default function AnalyzePage() {
     fetchConfig();
   }, []);
 
-  // Clear isStarting flag when state transitions
   useEffect(() => {
     if (
       state === "running" ||
@@ -53,7 +53,7 @@ export default function AnalyzePage() {
       clearMessages();
 
       await api.startAnalysis({
-        ticker: formConfig.ticker,
+        tickers: formConfig.tickers,
         analysis_date: formConfig.analysisDate,
         analysts: formConfig.analysts,
         research_depth: depthToValue[formConfig.researchDepth],
@@ -111,7 +111,12 @@ export default function AnalyzePage() {
           </div>
 
           <div className="panel-container">
-            <OutputPanel isConnected={isConnected} messages={messages} />
+            <OutputPanel
+              isConnected={isConnected}
+              messages={messages}
+              tickerProgress={tickerProgress}
+              analysisState={effectiveState}
+            />
           </div>
         </div>
       )}
