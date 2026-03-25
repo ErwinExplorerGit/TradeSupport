@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router";
 import { useAuthStore } from "../../../stores/authStore";
+import { Logo } from "./Logo";
 import "./styles.scss";
 
 const NAV_LINKS = [
@@ -21,8 +22,7 @@ export function Topbar() {
   return (
     <header className="app-header">
       <div className="nav-brand">
-        <span className="nav-title">TradeSupport</span>
-        <span className="nav-subtitle">POWERED BY AI</span>
+        <Logo />
       </div>
 
       <nav className="nav-links">
@@ -37,6 +37,8 @@ export function Topbar() {
             {label}
           </NavLink>
         ))}
+
+        <div className="nav-divider" />
 
         <button className="nav-link nav-link--logout" onClick={handleLogout}>
           Logout
