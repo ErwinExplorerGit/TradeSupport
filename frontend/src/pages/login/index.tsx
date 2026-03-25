@@ -1,4 +1,4 @@
-import { useLoginStore } from "../../stores/loginStore";
+import { useLoginStore } from "@/stores";
 import LoginForm from "./components/login";
 import VerifyEmail from "./components/verify_email";
 import "./styles.scss";

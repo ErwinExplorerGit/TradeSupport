@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useResetPasswordStore } from "../../stores/resetPasswordStore";
+import { useResetPasswordStore } from "@/stores";
 import Failed from "./components/failed";
 import Success from "./components/success";
 import Verifying from "./components/verify";

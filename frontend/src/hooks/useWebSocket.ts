@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { WebSocketMessage, AnalysisState, TickerProgress } from '../types';
-import { useAuthStore } from '../stores/authStore';
+import { WebSocketMessage, AnalysisState, TickerProgress } from '@/types';
+import { useAuthStore } from '@/stores/authStore';
 
 const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000/ws';
 const RECONNECT_DELAY = 3000;
@@ -22,7 +22,7 @@ export const useWebSocket = (): UseWebSocketResult => {
   const [tickerProgress, setTickerProgress] = useState<Record<string, TickerProgress>>({});
 
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldConnectRef = useRef(true);
 
   const updateProgress = useCallback((key: string, update: Partial<TickerProgress>) => {

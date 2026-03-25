@@ -1,6 +1,6 @@
 import { IoCheckmark } from "react-icons/io5";
-import { Button } from "../../../../../components";
-import type { ResendState } from "../../../../../stores/resetPasswordStore";
+import { Button } from "@/components";
+import type { ResendState } from "@/stores/resetPasswordStore";
 
 interface ResendActionProps {
   resendState: ResendState;

@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 /**
  * Wraps routes that should only be accessible when NOT authenticated

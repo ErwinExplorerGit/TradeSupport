@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ConfigFormData,
-  AnalysisState,
-  ApiConfig,
-  LLMProvider,
-} from "../../../../types";
+import { ConfigFormData, AnalysisState, ApiConfig, LLMProvider } from "@/types";
 import {
   TickerField,
   DateField,
@@ -27,7 +22,7 @@ interface ConfigPanelProps {
 export const ConfigPanel = ({
   onStartAnalysis,
   onAddTicker,
-  onStopAnalysis,
+  onStopAnalysis: _onStopAnalysis,
   analysisState,
   config,
   isStarting = false,

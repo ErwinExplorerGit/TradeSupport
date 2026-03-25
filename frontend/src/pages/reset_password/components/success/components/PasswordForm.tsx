@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router";
-import { Button, Input } from "../../../../../components";
-import { useResetPasswordStore } from "../../../../../stores/resetPasswordStore";
+import { Button, Input } from "@/components";
+import { useResetPasswordStore } from "@/stores";
 
 export default function PasswordForm() {
   const [searchParams] = useSearchParams();

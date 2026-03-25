@@ -1,4 +1,4 @@
-import { useAuthStore } from "../../../../stores/authStore";
+import { useAuthStore } from "@/stores";
 import "./styles.scss";
 
 export default function AccountInfo() {

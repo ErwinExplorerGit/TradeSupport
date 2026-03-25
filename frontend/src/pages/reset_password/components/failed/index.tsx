@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router";
-import { useResetPasswordStore } from "../../../../stores/resetPasswordStore";
+import { useResetPasswordStore } from "@/stores";
 import FailedIcon from "./components/FailedIcon";
 import FailedHeader from "./components/FailedHeader";
 import ResendAction from "./components/ResendAction";

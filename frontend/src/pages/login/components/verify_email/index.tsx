@@ -1,6 +1,6 @@
 import { MdOutlineEmail } from "react-icons/md";
-import { Button } from "../../../../components";
-import { useLoginStore } from "../../../../stores";
+import { Button } from "@/components";
+import { useLoginStore } from "@/stores";
 
 function VerifyEmail() {
   const reset = useLoginStore((s) => s.reset);

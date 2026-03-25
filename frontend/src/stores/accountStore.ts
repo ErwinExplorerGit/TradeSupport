@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../services/api';
-import { useAuthStore } from './authStore';
+import { api } from '@/services/api';
 
 interface AccountState {
     // change password
@@ -23,9 +22,9 @@ interface AccountState {
 }
 
 const initialState = {
-    currentPassword: '12345678',
-    newPassword: '123456789',
-    confirmPassword: '123456789',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
     loading: false,
     error: '',
     success: '',

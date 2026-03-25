@@ -1,17 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
-import { ProtectedRoute, PublicRoute } from "./components/index.ts";
-import AccountPage from "./pages/account/index.tsx";
-import AnalyzePage from "./pages/analyze/index.tsx";
-import DashboardPage from "./pages/dashboard/index.tsx";
-import ForgotPasswordPage from "./pages/forgot_password/index.tsx";
-import HistoryPage from "./pages/history/index.tsx";
-import LoginPage from "./pages/login/index.tsx";
-import NotFoundPage from "./pages/not_found/index.tsx";
-import RegisterPage from "./pages/register/index.tsx";
-import ResetPasswordPage from "./pages/reset_password/index.tsx";
-import VerifyPasswordPage from "./pages/verify_account/index.tsx";
+import { ProtectedRoute, PublicRoute } from "@/components";
+import AccountPage from "@/pages/account";
+import AnalyzePage from "@/pages/analyze";
+import DashboardPage from "@/pages/dashboard";
+import ForgotPasswordPage from "@/pages/forgot_password";
+import HistoryPage from "@/pages/history";
+import LoginPage from "@/pages/login";
+import NotFoundPage from "@/pages/not_found";
+import RegisterPage from "@/pages/register";
+import ResetPasswordPage from "@/pages/reset_password";
+import VerifyPasswordPage from "@/pages/verify_account";
 import "./styles.scss";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

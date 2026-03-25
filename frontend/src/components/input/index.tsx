@@ -1,7 +1,32 @@
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import "./styles.scss";
-import type { InputProps } from "./types";
+
+export type InputType =
+  | "text"
+  | "password"
+  | "email"
+  | "number"
+  | "search"
+  | "tel"
+  | "url";
+
+export interface InputProps {
+  id?: string;
+  label?: string;
+  type?: InputType;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  className?: string;
+  /** Slot for a trailing icon/button (e.g. show-password toggle) */
+  suffix?: React.ReactNode;
+}
 
 export const Input = ({
   id,
@@ -67,7 +92,9 @@ export const Input = ({
             {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
           </button>
         )}
-        {!isPassword && suffix && <span className="input-suffix">{suffix}</span>}
+        {!isPassword && suffix && (
+          <span className="input-suffix">{suffix}</span>
+        )}
       </div>
 
       {error && (

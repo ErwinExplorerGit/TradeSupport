@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router";
-import { useAuthStore } from "../../../stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { Logo } from "./Logo";
 import "./styles.scss";
 

@@ -2,8 +2,8 @@ import {
   AiOutlineCheckCircle,
   AiOutlineExclamationCircle,
 } from "react-icons/ai";
-import { Button, Input } from "../../../../components";
-import { useAccountStore } from "../../../../stores/accountStore";
+import { Button, Input } from "@/components";
+import { useAccountStore } from "@/stores";
 import "./styles.scss";
 
 export default function ChangePassword() {

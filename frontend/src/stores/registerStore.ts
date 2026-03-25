@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { isEmail } from '../utils';
-import { authService } from '../services/auth';
+import { isEmail } from '@/utils';
+import { authService } from '@/services/auth';
 
 interface RegisterErrors {
     firstName?: string;
@@ -28,11 +28,11 @@ interface RegisterState {
 }
 
 const initialState = {
-    firstName: 'erwin',
-    lastName: 'alapide',
-    email: 'erwinalapide.ca@gmail.com',
-    password: '12345678',
-    confirmPassword: '12345678',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
     loading: false,
     errors: {},
 };
