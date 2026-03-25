@@ -117,3 +117,18 @@ export interface HealthCheckResponse {
   active_connections: number;
 }
 
+export interface HistoryRecord {
+  id: string;
+  ticker: string;
+  company_name: string;
+  result: string | null;
+  scanned_at: string;
+}
+
+export interface HistoryResponse {
+  items: HistoryRecord[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
