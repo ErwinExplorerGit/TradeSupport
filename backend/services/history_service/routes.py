@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Query
 from typing import Optional
 import logging
 
@@ -19,22 +19,26 @@ def set_history_service(service: HistoryService):
     history_service = service
 
 
-@router.get("/{userid}/{ticker}")
-async def get_history(userid: str, ticker: str):
+@router.get("")
+async def get_history(
+    request: Request,
+    q: Optional[str] = Query(None, description="Filter by ticker or company name"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+):
     """
-    Get trading history for a specific user and ticker.
-
-    Args:
-        userid: The user ID
-        ticker: The stock ticker symbol
-
-    Returns:
-        Dictionary with userid and ticker
+    Get paginated scan history for the authenticated user.
+    Optionally filter by ticker symbol or company name.
     """
     if not history_service:
         return {"error": "History service not initialized"}
 
-    result = history_service.get_history(userid, ticker)
-    logger.info(f"History retrieved for user {userid} and ticker {ticker}")
-
+    user_id: str = request.state.user.get("sub")
+    result = await history_service.get_history(
+        user_id=user_id,
+        q=q,
+        page=page,
+        page_size=page_size,
+    )
+    logger.info(f"History retrieved for user {user_id} (q={q!r}, page={page})")
     return result

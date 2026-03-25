@@ -1,4 +1,4 @@
-import { AnalysisRequest, ApiConfig, HealthCheckResponse, TickerSuggestion } from '../types';
+import { AnalysisRequest, ApiConfig, HealthCheckResponse, HistoryResponse, TickerSuggestion } from '../types';
 import { axiosInstance } from '../axios';
 import { authService } from './auth';
 
@@ -51,6 +51,14 @@ export const api = {
    */
   async getAnalysisStatus(): Promise<{ state: string; is_running: boolean; tickers: any[] }> {
     const { data } = await axiosInstance.get('/api/trading/status');
+    return data;
+  },
+
+  /**
+   * Get paginated scan history for the authenticated user
+   */
+  async getHistory(params?: { q?: string; page?: number; page_size?: number }): Promise<HistoryResponse> {
+    const { data } = await axiosInstance.get<HistoryResponse>('/api/history', { params });
     return data;
   },
 };
