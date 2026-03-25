@@ -5,12 +5,12 @@ from pydantic import BaseModel, field_validator
 
 from utils.email_utils import is_valid_email
 from utils.send_email import send_email
-from .services import VerifyResendService, _APP_URL, _VERIFY_EXPIRY_HOURS
+from .services import ResendVerifyEmailService, _APP_URL, _VERIFY_EXPIRY_HOURS
 
 logger = logging.getLogger(__name__)
 
 
-class VerifyResendRequest(BaseModel):
+class ResendVerifyEmailRequest(BaseModel):
     email: str
 
     @field_validator("email")
@@ -21,14 +21,14 @@ class VerifyResendRequest(BaseModel):
         return v.lower()
 
 
-class VerifyResendResponse(BaseModel):
+class ResendVerifyEmailResponse(BaseModel):
     message: str
 
 
-async def verify_resend(
-    request: VerifyResendRequest,
-    service: VerifyResendService,
-) -> VerifyResendResponse:
+async def resend_verify_email(
+    request: ResendVerifyEmailRequest,
+    service: ResendVerifyEmailService,
+) -> ResendVerifyEmailResponse:
     """Resend a verification email to an unverified user."""
     user = await service.get_unverified_user(request.email)
     if user is None:
@@ -54,4 +54,4 @@ async def verify_resend(
         },
     )
 
-    return VerifyResendResponse(message="Verification email resent")
+    return ResendVerifyEmailResponse(message="Verification email resent")

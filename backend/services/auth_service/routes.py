@@ -3,9 +3,9 @@ from fastapi import APIRouter
 from config.database import get_pool
 from .login import LoginRequest, LoginResponse, login as _login, LoginService
 from .registration import RegisterRequest, RegisterResponse, register as _register, RegistrationService
-from .verify import VerifyRequest, VerifyResponse, verify as _verify, VerifyService
-from .verify_resend import VerifyResendRequest, VerifyResendResponse, verify_resend as _verify_resend, VerifyResendService
+from .verify_email import VerifyEmailRequest, VerifyEmailResponse, verify_email as _verify_email, VerifyEmailService
 from .forgot_password import ForgotPasswordRequest, ForgotPasswordResponse, forgot_password as _forgot_password, ForgotPasswordService
+from .resend_verify_email import ResendVerifyEmailRequest, ResendVerifyEmailResponse, resend_verify_email as _resend_verify_email, ResendVerifyEmailService
 from .verify_reset_password_token import VerifyPasswordResetRequest, VerifyPasswordResetResponse, verify_reset_password_token as _verify_reset_password_token, VerifyPasswordResetService
 from .reset_password import ResetPasswordRequest, ResetPasswordResponse, reset_password as _reset_password, ResetPasswordService
 
@@ -24,16 +24,16 @@ async def register(request: RegisterRequest):
     return await _register(request, registration_service)
 
 
-@router.post("/verify/resend", response_model=VerifyResendResponse)
-async def verify_resend(request: VerifyResendRequest):
-    service = VerifyResendService(get_pool())
-    return await _verify_resend(request, service)
+@router.post("/resend-verify-email", response_model=ResendVerifyEmailResponse)
+async def resend_verify_email(request: ResendVerifyEmailRequest):
+    service = ResendVerifyEmailService(get_pool())
+    return await _resend_verify_email(request, service)
 
 
-@router.post("/verify", response_model=VerifyResponse)
-async def verify(request: VerifyRequest):
-    service = VerifyService(get_pool())
-    return await _verify(request, service)
+@router.post("/verify-email", response_model=VerifyEmailResponse)
+async def verify_email(request: VerifyEmailRequest):
+    service = VerifyEmailService(get_pool())
+    return await _verify_email(request, service)
 
 
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
@@ -42,7 +42,7 @@ async def forgot_password(request: ForgotPasswordRequest):
     return await _forgot_password(request, service)
 
 
-@router.post("/verify_reset_password_token", response_model=VerifyPasswordResetResponse)
+@router.post("/verify-reset-password-token", response_model=VerifyPasswordResetResponse)
 async def verify_reset_password_token(request: VerifyPasswordResetRequest):
     service = VerifyPasswordResetService(get_pool())
     return await _verify_reset_password_token(request, service)

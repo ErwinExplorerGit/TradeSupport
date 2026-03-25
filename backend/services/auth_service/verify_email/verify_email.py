@@ -3,23 +3,23 @@ import logging
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from .services import VerifyService
+from .services import VerifyEmailService
 
 logger = logging.getLogger(__name__)
 
 
-class VerifyRequest(BaseModel):
+class VerifyEmailRequest(BaseModel):
     token: str
 
 
-class VerifyResponse(BaseModel):
+class VerifyEmailResponse(BaseModel):
     message: str
 
 
-async def verify(
-    request: VerifyRequest,
-    service: VerifyService,
-) -> VerifyResponse:
+async def verify_email(
+    request: VerifyEmailRequest,
+    service: VerifyEmailService,
+) -> VerifyEmailResponse:
     """Verify a user account using the token delivered by email."""
     success = await service.verify_token(request.token)
     if not success:
@@ -28,4 +28,4 @@ async def verify(
             detail="Invalid or expired verification token",
         )
     logger.info("Account verified successfully via token")
-    return VerifyResponse(message="Account verified successfully")
+    return VerifyEmailResponse(message="Account verified successfully")

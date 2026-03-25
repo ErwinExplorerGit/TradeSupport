@@ -12,7 +12,7 @@ _VERIFY_EXPIRY_HOURS = 24
 _APP_URL = os.getenv("APP_URL", "http://localhost:5173")
 
 
-class VerifyResendService:
+class ResendVerifyEmailService:
     """Regenerates a verification token for an unverified user."""
 
     def __init__(self, pool: Pool):

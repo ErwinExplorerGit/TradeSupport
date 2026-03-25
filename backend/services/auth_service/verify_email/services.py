@@ -8,7 +8,7 @@ from fastapi import HTTPException
 logger = logging.getLogger(__name__)
 
 
-class VerifyService:
+class VerifyEmailService:
     """Verifies a user account using a raw verification token."""
 
     def __init__(self, pool: Pool):
