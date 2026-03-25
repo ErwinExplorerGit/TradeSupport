@@ -15,7 +15,7 @@ export const LLMProviderField = ({
   disabled,
 }: LLMProviderFieldProps) => (
   <Dropdown
-    label="LLM Provider"
+    label="Provider"
     value={value}
     options={providers.map((p) => ({ label: p.name, value: p.value }))}
     onChange={(v) => onChange(v as LLMProvider)}

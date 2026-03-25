@@ -16,26 +16,25 @@ export const AnalystsField = ({
   disabled,
 }: AnalystsFieldProps) => {
   return (
-    <div className="form-section">
-      <label className="form-label">Select Analysis</label>
-      <div className="checkbox-group">
-        {availableAnalysts.map((analystName) => {
-          const fieldKey = analystMap[analystName];
-          if (!fieldKey) return null;
-          const displayName = analystName.replace(/ Analyst$/, "");
-          return (
-            <label key={analystName} className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={analysts[fieldKey] || false}
-                onChange={() => onChange(fieldKey)}
-                disabled={disabled}
-              />
-              <span>{displayName}</span>
-            </label>
-          );
-        })}
-      </div>
+    <div className="cp-analysts">
+      {availableAnalysts.map((analystName) => {
+        const fieldKey = analystMap[analystName];
+        if (!fieldKey) return null;
+        const displayName = analystName.replace(/ Analyst$/, "");
+        const isChecked = analysts[fieldKey] || false;
+        return (
+          <button
+            key={analystName}
+            type="button"
+            className={`cp-analyst-pill${isChecked ? " cp-analyst-pill--on" : ""}`}
+            onClick={() => !disabled && onChange(fieldKey)}
+            disabled={disabled}
+            aria-pressed={isChecked}
+          >
+            {displayName}
+          </button>
+        );
+      })}
     </div>
   );
 };

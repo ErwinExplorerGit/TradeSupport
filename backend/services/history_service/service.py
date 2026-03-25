@@ -45,13 +45,13 @@ class HistoryService:
                 rows = await conn.fetch(
                     """
                     SELECT sh.id, c.ticker, c.name AS company_name,
-                           sh.result, sh.scanned_at
+                           sh.result, sh.scanned_at, sh.agent, sh.analysis_date
                     FROM scan_history sh
                     JOIN user_companies uc ON sh.user_company_id = uc.id
                     JOIN companies c ON uc.company_id = c.id
                     WHERE uc.user_id = $1
                       AND (UPPER(c.ticker) = UPPER($2) OR LOWER(c.name) LIKE LOWER($3))
-                    ORDER BY sh.scanned_at DESC
+                    ORDER BY sh.analysis_date DESC NULLS LAST, sh.scanned_at DESC
                     LIMIT $4 OFFSET $5
                     """,
                     user_id,
@@ -73,12 +73,12 @@ class HistoryService:
                 rows = await conn.fetch(
                     """
                     SELECT sh.id, c.ticker, c.name AS company_name,
-                           sh.result, sh.scanned_at
+                           sh.result, sh.scanned_at, sh.agent, sh.analysis_date
                     FROM scan_history sh
                     JOIN user_companies uc ON sh.user_company_id = uc.id
                     JOIN companies c ON uc.company_id = c.id
                     WHERE uc.user_id = $1
-                    ORDER BY sh.scanned_at DESC
+                    ORDER BY sh.analysis_date DESC NULLS LAST, sh.scanned_at DESC
                     LIMIT $2 OFFSET $3
                     """,
                     user_id,
@@ -93,6 +93,8 @@ class HistoryService:
                 "company_name": row["company_name"],
                 "result": row["result"],
                 "scanned_at": row["scanned_at"].isoformat(),
+                "agent": row["agent"],
+                "analysis_date": row["analysis_date"].isoformat() if row["analysis_date"] else None,
             }
             for row in rows
         ]

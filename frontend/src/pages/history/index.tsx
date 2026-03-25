@@ -58,6 +58,19 @@ function formatDate(iso: string) {
   });
 }
 
+function formatDateOnly(dateStr: string) {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function isToday(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return false;
+  return dateStr.slice(0, 10) === new Date().toISOString().slice(0, 10);
+}
+
 function DetailModal({
   record,
   onClose,
@@ -91,9 +104,17 @@ function DetailModal({
 
         <div className="history-modal-meta">
           <DecisionBadge result={record.result} />
-          <span className="history-modal-date">
-            <FiClock /> {formatDate(record.scanned_at)}
-          </span>
+          {record.analysis_date && (
+            <span className="history-modal-date">
+              <FiClock /> {formatDateOnly(record.analysis_date)}
+              {isToday(record.analysis_date) && (
+                <span className="history-today-badge">Today</span>
+              )}
+            </span>
+          )}
+          {record.agent && (
+            <span className="history-modal-agent">{record.agent}</span>
+          )}
         </div>
 
         <div className="history-modal-body">
@@ -371,7 +392,8 @@ export default function HistoryPage() {
                     <th>Ticker</th>
                     <th>Company</th>
                     <th>Decision</th>
-                    <th>Date</th>
+                    <th>Agent</th>
+                    <th>Analysis Date</th>
                     <th>Details</th>
                   </tr>
                 </thead>
@@ -389,8 +411,18 @@ export default function HistoryPage() {
                       <td>
                         <DecisionBadge result={record.result} />
                       </td>
+                      <td className="history-agent">{record.agent ?? "—"}</td>
                       <td className="history-date">
-                        {formatDate(record.scanned_at)}
+                        {record.analysis_date ? (
+                          <span className="history-analysis-date">
+                            {formatDateOnly(record.analysis_date)}
+                            {isToday(record.analysis_date) && (
+                              <span className="history-today-badge">Today</span>
+                            )}
+                          </span>
+                        ) : (
+                          formatDate(record.scanned_at)
+                        )}
                       </td>
                       <td>
                         <button

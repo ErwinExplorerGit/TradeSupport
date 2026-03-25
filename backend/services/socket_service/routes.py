@@ -51,8 +51,13 @@ async def websocket_endpoint(
         if ticker_progress:
             await websocket.send_json({"type": "batch_status", "tickers": list(ticker_progress.values())})
 
-        # 3. Replay message history so the user sees what happened while away
+        # 3. Replay log message history so the user sees what happened while away.
+        #    Skip progress/result/status messages — batch_status already provides
+        #    the current state snapshot, and replaying those types would re-add
+        #    completed tickers to the UI on reconnect.
         for msg in manager.get_user_history(user_id):
+            if msg.get("type") != "log":
+                continue
             try:
                 await websocket.send_json(msg)
             except Exception:

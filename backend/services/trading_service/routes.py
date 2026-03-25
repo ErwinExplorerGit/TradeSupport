@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, Query
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 import asyncio
 import logging
@@ -16,8 +16,10 @@ router = APIRouter(prefix="/api/trading", tags=["trading"])
 
 trading_service: Optional[TradingService] = None
 
-# Per-user running tasks: user_id -> asyncio.Task
+# Per-user running tasks: user_id -> asyncio.Task (the batch)
 user_analysis_tasks: dict[str, asyncio.Task] = {}
+# Per-user add-ticker tasks: user_id -> {ticker: asyncio.Task}
+user_addon_tasks: dict[str, dict[str, asyncio.Task]] = {}
 
 
 def set_trading_service(service: TradingService):
@@ -88,10 +90,26 @@ def _extract_decision(messages: list[str]) -> Optional[str]:
     return None
 
 
+def _extract_final_decision_text(messages: list[str]) -> Optional[str]:
+    """Return the final decision block starting from the 'Ticker:' line.
+
+    In real mode the entire block is one message — slice from 'Ticker:' onward.
+    In mock mode each line is a separate message — join from the 'Ticker:' message onward.
+    """
+    for i, msg in enumerate(messages):
+        # Real mode: whole block is one message containing both markers
+        if "Ticker:" in msg and "FINAL TRADING DECISION" in msg:
+            return msg[msg.find("Ticker:") :]
+        # Mock mode: 'Ticker:' is its own standalone message
+        if msg.strip().startswith("Ticker:"):
+            return "\n".join(messages[i:])
+    return None
+
+
 # ── DB helpers ─────────────────────────────────────────────────────────────────
 
 
-async def _save_result_to_db(user_id: str, ticker: str, result_text: str, decision: Optional[str]) -> None:
+async def _save_result_to_db(user_id: str, ticker: str, result_text: str, decision: Optional[str], agent: str, analysis_date: date) -> None:
     try:
         pool = get_pool()
         async with pool.acquire() as conn:
@@ -130,12 +148,14 @@ async def _save_result_to_db(user_id: str, ticker: str, result_text: str, decisi
                     company_id,
                 )
 
-            # Save history
-            save_text = decision or (result_text[-1000:] if result_text else "Analysis completed")
+            # Save history — prefer the full final decision block, fall back to a short signal
+            save_text = result_text or decision or "Analysis completed"
             await conn.execute(
-                "INSERT INTO scan_history (user_company_id, result) VALUES ($1, $2)",
+                "INSERT INTO scan_history (user_company_id, result, agent, analysis_date) VALUES ($1, $2, $3, $4)",
                 uc_id,
                 save_text,
+                agent,
+                analysis_date,
             )
             logger.info(f"Saved analysis result for user {user_id}, ticker {ticker}")
     except Exception as exc:
@@ -149,8 +169,9 @@ async def _run_single_ticker(user_id: str, request: AnalysisRequest) -> None:
     ticker = request.ticker
     accumulated: list[str] = []
 
+    analysis_date_str = str(request.analysis_date)
     try:
-        await user_manager.broadcast_user_progress(user_id, ticker, 0, "Starting")
+        await user_manager.broadcast_user_progress(user_id, ticker, 0, "Starting", analysis_date_str)
 
         async for message in trading_service.run_analysis(request):
             accumulated.append(message)
@@ -158,30 +179,49 @@ async def _run_single_ticker(user_id: str, request: AnalysisRequest) -> None:
             pct = _estimate_progress(message)
             if pct is not None:
                 step_label = message.strip()[:60]
-                await user_manager.broadcast_user_progress(user_id, ticker, pct, step_label)
+                await user_manager.broadcast_user_progress(user_id, ticker, pct, step_label, analysis_date_str)
 
         # Final progress = 100
-        await user_manager.broadcast_user_progress(user_id, ticker, 100, "Complete")
+        await user_manager.broadcast_user_progress(user_id, ticker, 100, "Complete", analysis_date_str)
 
         # Extract & broadcast the decision
         decision = _extract_decision(accumulated)
         if decision:
-            await user_manager.broadcast_user_result(user_id, ticker, decision)
+            await user_manager.broadcast_user_result(user_id, ticker, decision, analysis_date_str)
 
-        # Persist to DB
-        await _save_result_to_db(user_id, ticker, "\n".join(accumulated), decision)
+        # Persist to DB — skip if analysis produced an error
+        has_error = any("ERROR :" in msg for msg in accumulated)
+        if not has_error:
+            final_text = _extract_final_decision_text(accumulated)
+            _ANALYST_LABELS = {
+                "market": "Market",
+                "social": "Social",
+                "news": "News",
+                "fundamentals": "Fundamentals",
+                "momentum": "Momentum",
+            }
+            active_analysts = [label for field, label in _ANALYST_LABELS.items() if getattr(request.analysts, field, False)]
+            agent = ", ".join(active_analysts) if active_analysts else "None"
+            await _save_result_to_db(user_id, ticker, final_text, decision, agent, request.analysis_date)
 
     except asyncio.CancelledError:
-        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Cancelled")
+        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Cancelled", analysis_date_str)
         raise
     except Exception as exc:
         err_msg = f"Analysis failed for {ticker}: {exc}"
         logger.error(err_msg, exc_info=True)
         await user_manager.broadcast_user_log(user_id, ticker, err_msg)
-        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Error")
+        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Error", analysis_date_str)
 
 
 # ── Batch runner ───────────────────────────────────────────────────────────────
+
+
+async def _broadcast_idle_if_addons_done(user_id: str) -> None:
+    """Broadcast IDLE only when no add-ticker tasks remain running."""
+    addon_tasks = user_addon_tasks.get(user_id, {})
+    if not any(not t.done() for t in addon_tasks.values()):
+        await user_manager.broadcast_user_status(user_id, AnalysisState.IDLE)
 
 
 async def _run_batch_analysis(user_id: str, request: AnalysisBatchRequest) -> None:
@@ -196,7 +236,8 @@ async def _run_batch_analysis(user_id: str, request: AnalysisBatchRequest) -> No
             return_exceptions=True,
         )
 
-        await user_manager.broadcast_user_status(user_id, AnalysisState.IDLE)
+        # Only set IDLE if no add-ticker tasks are still running
+        await _broadcast_idle_if_addons_done(user_id)
 
     except asyncio.CancelledError:
         await user_manager.broadcast_user_log(user_id, "", "Analysis batch stopped by user")
@@ -347,7 +388,7 @@ async def start_analysis(body: AnalysisBatchRequest, request: Request):
         raise HTTPException(status_code=409, detail="Analysis already running. Stop it first.")
 
     logger.info(f"Starting batch analysis for user {user_id}: {body.tickers}")
-    user_manager.reset_user_session(user_id, body.tickers)
+    user_manager.reset_user_session(user_id, [(t, str(body.analysis_date)) for t in body.tickers])
 
     task = asyncio.create_task(_run_batch_analysis(user_id, body))
     user_analysis_tasks[user_id] = task
@@ -365,14 +406,61 @@ async def stop_analysis(request: Request):
     user_id: str = request.state.user.get("sub")
 
     task = user_analysis_tasks.get(user_id)
-    if not task or task.done():
+    addon_tasks = list(user_addon_tasks.get(user_id, {}).values())
+    batch_running = task and not task.done()
+    addons_running = any(not t.done() for t in addon_tasks)
+
+    if not batch_running and not addons_running:
         raise HTTPException(status_code=400, detail="No analysis is currently running")
 
     logger.info(f"Stopping analysis for user {user_id}")
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
+
+    if batch_running:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+    for ticker_task in addon_tasks:
+        if not ticker_task.done():
+            ticker_task.cancel()
+    user_addon_tasks.pop(user_id, None)
+
+    # If only addons were running (batch already done), broadcast STOPPED ourselves
+    if not batch_running:
+        await user_manager.broadcast_user_status(user_id, AnalysisState.STOPPED)
 
     return {"status": "stopped", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
+
+@router.post("/add-ticker")
+async def add_ticker(body: AnalysisRequest, request: Request):
+    """Add a ticker to the analysis table while a batch may already be running."""
+    user_id: str = request.state.user.get("sub")
+    ticker = body.ticker
+
+    # Register the ticker in progress (does not reset existing entries)
+    user_manager.register_ticker(user_id, ticker, str(body.analysis_date))
+
+    # Ensure state is RUNNING so the frontend shows the card immediately
+    if user_manager.get_user_state(user_id) != AnalysisState.RUNNING:
+        await user_manager.broadcast_user_status(user_id, AnalysisState.RUNNING)
+
+    async def _run_addon():
+        try:
+            await _run_single_ticker(user_id, body)
+        finally:
+            user_addon_tasks.get(user_id, {}).pop(ticker, None)
+            # If the batch is done and no more addons remain, set IDLE
+            batch_task = user_analysis_tasks.get(user_id)
+            batch_done = not batch_task or batch_task.done()
+            addons_pending = any(not t.done() for t in user_addon_tasks.get(user_id, {}).values())
+            if batch_done and not addons_pending:
+                await user_manager.broadcast_user_status(user_id, AnalysisState.IDLE)
+
+    addon_task = asyncio.create_task(_run_addon())
+    user_addon_tasks.setdefault(user_id, {})[ticker] = addon_task
+
+    logger.info(f"Add-ticker task started for user {user_id}: {ticker}")
+    return {"status": "queued", "ticker": ticker, "timestamp": datetime.utcnow().isoformat() + "Z"}

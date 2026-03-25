@@ -2,21 +2,24 @@ import { Button } from "../../../../../components";
 
 interface ActionButtonsProps {
   isRunning: boolean;
-  onStop: () => void;
+  isAddingTicker?: boolean;
+  isStarting?: boolean;
 }
 
-export const ActionButtons = ({ isRunning, onStop }: ActionButtonsProps) => (
-  <div className="button-group">
+export const ActionButtons = ({
+  isRunning,
+  isAddingTicker = false,
+  isStarting = false,
+}: ActionButtonsProps) => (
+  <div className="cp-actions">
     <Button
       type="submit"
       variant="primary"
-      loading={isRunning}
-      loadingText="Analyzing..."
+      className="cp-btn-start"
+      loading={isStarting || isAddingTicker}
+      loadingText={isStarting ? "Starting..." : "Adding..."}
     >
-      Start Analysis
-    </Button>
-    <Button variant="secondary" onClick={onStop} disabled={!isRunning}>
-      Stop
+      {isRunning && !isStarting ? "Add to Analysis" : "Run Analysis"}
     </Button>
   </div>
 );
