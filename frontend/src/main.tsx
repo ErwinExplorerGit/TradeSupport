@@ -11,6 +11,7 @@ import LoginPage from "./pages/login/index.tsx";
 import NotFoundPage from "./pages/not_found/index.tsx";
 import RegisterPage from "./pages/register/index.tsx";
 import VerifyPasswordPage from "./pages/verify_account/index.tsx";
+import AccountPage from "./pages/account/index.tsx";
 import "./styles.scss";
 import ResetPasswordPage from "./pages/reset_password/index.tsx";
 
@@ -37,6 +38,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route element={<ProtectedRoute />}>
             <Route path="/analyze" element={<AnalyzePage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
 
           {/* 404 */}

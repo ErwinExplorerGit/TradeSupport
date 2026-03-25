@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 # module-level config objects (e.g. SMTPConfig, database DSN) read the
 # correct values from .env on first access.
 _env_path = Path(__file__).resolve().parent / ".env"
-print(f"Loading environment variables from: {_env_path}")
 load_dotenv(dotenv_path=_env_path)
 
 from fastapi import FastAPI
@@ -83,8 +82,12 @@ app = FastAPI(
 )
 
 # Configure CORS
-_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174")
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+# Include middleware (registered before CORSMiddleware so that CORS runs first
+# in the actual execution order — Starlette applies middleware in LIFO order)
+app.add_middleware(Middleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,9 +96,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Include middleware
-app.add_middleware(Middleware)
 
 # Include service routers
 app.include_router(auth_router)

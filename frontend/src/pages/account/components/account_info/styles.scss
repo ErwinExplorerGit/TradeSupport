@@ -1,0 +1,95 @@
+.account-info-card {
+  // handled by parent card wrapper
+}
+
+.account-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.account-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.account-info-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+}
+
+.account-info-value {
+  font-size: 0.95rem;
+  color: #1a2a3a;
+  word-break: break-all;
+}
+
+.account-info-value--mono {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.account-info-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.account-info-edit-btn {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #23446d;
+  cursor: pointer;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #e8eef6;
+  }
+}
+
+.account-info-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.account-info-edit-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.account-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+
+  svg {
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+
+  &--error {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+  }
+
+  &--success {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #15803d;
+  }
+}
