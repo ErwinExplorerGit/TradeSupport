@@ -27,6 +27,7 @@ from services.history_service.routes import set_history_service
 from services.socket_service import router as socket_router, broadcast_status, broadcast_log
 from services.socket_service import manager as socket_manager
 from services.health_service import router as health_router, set_health_callbacks
+from middleware.middleware import Middleware
 
 """
 FastAPI backend for TradingAgent real-time streaming.
@@ -92,6 +93,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include middleware
+app.add_middleware(Middleware)
 
 # Include service routers
 app.include_router(auth_router)

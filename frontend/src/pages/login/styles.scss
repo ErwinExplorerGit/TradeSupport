@@ -236,3 +236,73 @@
     }
   }
 }
+
+// ── Verify email card ────────────────────────────────────────────────────────
+
+.verify-email-card {
+  text-align: center;
+}
+
+.verify-email-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #d97706;
+  margin: 0 auto 1.5rem;
+}
+
+.verify-email-hint {
+  background: #f8f9fa;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-sm;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  color: $color-text-muted;
+  line-height: 1.5;
+}
+
+.verify-email-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: $border-radius-sm;
+  color: #166534;
+  font-size: 0.875rem;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.verify-email-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.verify-back-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid $color-border;
+  border-radius: $border-radius-sm;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: $color-white;
+  color: $color-text-primary;
+  transition: all $transition-std;
+
+  &:hover {
+    border-color: $color-navy;
+    color: $color-navy;
+  }
+}
+
+.verify-email-footer {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+  line-height: 1.5;
+}

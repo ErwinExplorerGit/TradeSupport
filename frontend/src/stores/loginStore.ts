@@ -7,11 +7,16 @@ interface LoginState {
     password: string;
     loading: boolean;
     error: string;
+    unverified: boolean;
+    unverifiedEmail: string;
+    resendLoading: boolean;
+    resendSuccess: boolean;
     setUsername: (username: string) => void;
     setPassword: (password: string) => void;
     clearError: () => void;
     reset: () => void;
     submit: (onSuccess: () => void) => Promise<void>;
+    resendVerification: () => Promise<void>;
 }
 
 const initialState = {
@@ -19,6 +24,10 @@ const initialState = {
     password: '12345678',
     loading: false,
     error: '',
+    unverified: false,
+    unverifiedEmail: '',
+    resendLoading: false,
+    resendSuccess: false,
 };
 
 export const useLoginStore = create<LoginState>((set, get) => ({
@@ -50,10 +59,23 @@ export const useLoginStore = create<LoginState>((set, get) => ({
             set(initialState);
             onSuccess();
         } catch (err) {
-            set({
-                loading: false,
-                error: err instanceof Error ? err.message : 'Login failed. Please try again.',
-            });
+            const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+            if (message === 'Account email is not verified') {
+                set({ loading: false, error: '', unverified: true, unverifiedEmail: username.trim() });
+            } else {
+                set({ loading: false, error: message });
+            }
+        }
+    },
+
+    resendVerification: async () => {
+        const { unverifiedEmail } = get();
+        set({ resendLoading: true, resendSuccess: false });
+        try {
+            await api.verifyResend({ email: unverifiedEmail });
+            set({ resendLoading: false, resendSuccess: true });
+        } catch {
+            set({ resendLoading: false });
         }
     },
 }));
