@@ -39,7 +39,7 @@ export const ConfigPanel = ({
   };
 
   const [formData, setFormData] = useState<ConfigFormData>({
-    ticker: "TSLA",
+    tickers: ["TSLA"],
     analysisDate: today,
     analysts: {
       market: true,
@@ -90,6 +90,7 @@ export const ConfigPanel = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.tickers.length === 0) return;
     onStartAnalysis(formData);
   };
 
@@ -101,8 +102,8 @@ export const ConfigPanel = ({
       <form onSubmit={handleSubmit}>
         <div className="form-content">
           <TickerField
-            value={formData.ticker}
-            onChange={(v) => handleInputChange("ticker", v)}
+            value={formData.tickers}
+            onChange={(v) => handleInputChange("tickers", v)}
             disabled={isRunning}
           />
           <DateField

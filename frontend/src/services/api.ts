@@ -1,11 +1,11 @@
-import { AnalysisRequest, ApiConfig, HealthCheckResponse } from '../types';
+import { AnalysisRequest, ApiConfig, HealthCheckResponse, TickerSuggestion } from '../types';
 import { axiosInstance } from '../axios';
 import { authService } from './auth';
 
 export const api = {
   ...authService,
   /**
-   * Start a new analysis
+   * Start a new batch analysis (one or more tickers)
    */
   async startAnalysis(request: AnalysisRequest): Promise<void> {
     const { data } = await axiosInstance.post('/api/trading/start', request);
@@ -35,4 +35,23 @@ export const api = {
     const { data } = await axiosInstance.get<ApiConfig>('/api/trading/config');
     return data;
   },
+
+  /**
+   * Search tickers from the database
+   */
+  async searchTickers(q: string): Promise<TickerSuggestion[]> {
+    const { data } = await axiosInstance.get<TickerSuggestion[]>('/api/trading/tickers/search', {
+      params: { q },
+    });
+    return data;
+  },
+
+  /**
+   * Get current analysis status for the authenticated user
+   */
+  async getAnalysisStatus(): Promise<{ state: string; is_running: boolean; tickers: any[] }> {
+    const { data } = await axiosInstance.get('/api/trading/status');
+    return data;
+  },
 };
+

@@ -522,3 +522,317 @@ select.form-input {
     flex-direction: column;
   }
 }
+
+// ── Ticker Field (multi-select with autocomplete) ──────────────────────────────
+.ticker-field {
+  position: relative;
+}
+
+.ticker-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.ticker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: $color-navy-dark;
+  color: $color-white;
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem 0.2rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ticker-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-white;
+  }
+}
+
+.ticker-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-search-icon {
+  position: absolute;
+  left: 0.65rem;
+  color: #999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-search-input {
+  padding-left: 2rem !important;
+  padding-right: 2.5rem !important;
+}
+
+.ticker-add-btn {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-accent;
+  display: flex;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: 3px;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.12);
+  }
+}
+
+.ticker-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: $color-white;
+  border: 1.5px solid $color-border;
+  border-radius: $border-radius-sm;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.ticker-dropdown-loading {
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.ticker-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  color: $color-text-primary;
+  transition: background $transition-fast;
+
+  &:hover,
+  &.active {
+    background: rgba(102, 126, 234, 0.08);
+  }
+}
+
+.ticker-dropdown-symbol {
+  font-weight: 700;
+  min-width: 3rem;
+  color: $color-navy-dark;
+  font-size: 0.85rem;
+}
+
+.ticker-dropdown-name {
+  color: #666;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── Ticker Progress Cards ──────────────────────────────────────────────────────
+.ticker-progress-section {
+  padding: 0.85rem 1.25rem 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  &.active .ticker-card--running {
+    border-color: rgba(102, 126, 234, 0.5);
+  }
+}
+
+.ticker-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  transition: border-color $transition-std;
+
+  &--done {
+    border-color: rgba(76, 175, 125, 0.35);
+    background: rgba(76, 175, 125, 0.06);
+  }
+
+  &--error {
+    border-color: rgba(224, 82, 82, 0.35);
+    background: rgba(224, 82, 82, 0.06);
+  }
+
+  &--running {
+    border-color: rgba(102, 126, 234, 0.35);
+    background: rgba(102, 126, 234, 0.06);
+  }
+}
+
+.ticker-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.ticker-card-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ticker-card-right {
+  display: flex;
+  align-items: center;
+}
+
+.ticker-card-symbol {
+  color: $color-white;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.05em;
+}
+
+.ticker-card-pct {
+  color: #a0b8d0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ticker-card-step {
+  color: #7a99b8;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticker-status-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+
+  &.done {
+    color: #4caf7d;
+  }
+
+  &.error {
+    color: $color-red;
+  }
+
+  &.running {
+    color: $color-accent;
+  }
+
+  &.pending {
+    color: #7a99b8;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+// ── Progress bar ───────────────────────────────────────────────────────────────
+.ticker-progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ticker-progress-fill {
+  height: 100%;
+  background: $color-accent;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+
+  &.done {
+    background: #4caf7d;
+  }
+
+  &.error {
+    background: $color-red;
+  }
+}
+
+// ── Decision badges ────────────────────────────────────────────────────────────
+.decision-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.decision-buy {
+  background: rgba(76, 175, 125, 0.2);
+  color: #4caf7d;
+  border: 1px solid rgba(76, 175, 125, 0.4);
+}
+
+.decision-sell {
+  background: rgba(224, 82, 82, 0.2);
+  color: #e05252;
+  border: 1px solid rgba(224, 82, 82, 0.4);
+}
+
+.decision-hold {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.decision-error {
+  background: rgba(224, 82, 82, 0.15);
+  color: #e05252;
+  border: 1px solid rgba(224, 82, 82, 0.3);
+}
+
+// ── Status bar running label ───────────────────────────────────────────────────
+.status-running-label {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: $color-accent;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+// ── Terminal ticker prefix ─────────────────────────────────────────────────────
+.terminal-ticker-label {
+  color: $color-accent;
+  font-weight: 600;
+  font-size: 0.82rem;
+  margin-right: 0.1rem;
+}

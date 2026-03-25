@@ -22,6 +22,8 @@ PUBLIC_ROUTE_PREFIXES: tuple[str, ...] = (
     "/api/auth/verify-reset-password-token",
     "/api/auth/reset-password",
     "/api/auth/refresh",
+    # WebSocket — authenticates itself via ?token= query param
+    "/ws",
     # Documentation routes (if enabled)
     "/docs",
     "/openapi.json",

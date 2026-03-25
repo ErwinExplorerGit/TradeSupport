@@ -9,9 +9,18 @@ export interface AnalystConfig {
 export type ResearchDepth = 'quick' | 'standard' | 'deep';
 export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'openrouter' | 'ollama';
 export type AnalysisState = 'idle' | 'running' | 'stopped' | 'error';
+export type TickerStatus = 'pending' | 'running' | 'done' | 'error';
+
+export interface TickerProgress {
+  ticker: string;
+  percentage: number;
+  step: string;
+  status: TickerStatus;
+  decision?: string | null;
+}
 
 export interface AnalysisRequest {
-  ticker: string;
+  tickers: string[];
   analysis_date: string;
   analysts: AnalystConfig;
   research_depth: number;
@@ -22,6 +31,7 @@ export interface AnalysisRequest {
 
 export interface LogMessage {
   type: 'log';
+  ticker: string;
   message: string;
   ts: string;
 }
@@ -31,19 +41,39 @@ export interface StatusMessage {
   state: AnalysisState;
 }
 
+export interface ProgressMessage {
+  type: 'progress';
+  ticker: string;
+  percentage: number;
+  step: string;
+  status: TickerStatus;
+}
+
 export interface ResultMessage {
   type: 'result';
-  payload: any;
+  ticker: string;
+  decision: string;
+}
+
+export interface BatchStatusMessage {
+  type: 'batch_status';
+  tickers: TickerProgress[];
 }
 
 export interface PingMessage {
   type: 'ping';
 }
 
-export type WebSocketMessage = LogMessage | StatusMessage | ResultMessage | PingMessage;
+export type WebSocketMessage =
+  | LogMessage
+  | StatusMessage
+  | ProgressMessage
+  | ResultMessage
+  | BatchStatusMessage
+  | PingMessage;
 
 export interface ConfigFormData {
-  ticker: string;
+  tickers: string[];
   analysisDate: string;
   analysts: AnalystConfig;
   researchDepth: ResearchDepth;
@@ -68,12 +98,16 @@ export interface DepthOption {
 }
 
 export interface ApiConfig {
-  tickers: Array<{ name: string; symbol: string }>;
   analysts: string[];
   depth: DepthOption[];
   provider: ProviderOption[];
   shallow: Record<string, ModelOption[]>;
   deep: Record<string, ModelOption[]>;
+}
+
+export interface TickerSuggestion {
+  name: string;
+  symbol: string;
 }
 
 export interface HealthCheckResponse {
@@ -82,3 +116,4 @@ export interface HealthCheckResponse {
   trading_mode: string;
   active_connections: number;
 }
+

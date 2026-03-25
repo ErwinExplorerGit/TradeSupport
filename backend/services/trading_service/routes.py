@@ -1,89 +1,220 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Query
 from datetime import datetime
 from typing import Optional
 import asyncio
 import logging
+import re
 
-from models import AnalysisRequest, AnalysisState
+from models import AnalysisRequest, AnalysisBatchRequest, AnalysisState
 from .service import TradingService
+from services.socket_service import manager as user_manager
+from config.database import get_pool
 
 logger = logging.getLogger(__name__)
 
-# Create router
 router = APIRouter(prefix="/api/trading", tags=["trading"])
 
-# Service instance (will be set by main.py)
 trading_service: Optional[TradingService] = None
 
-# Module-level state for analysis tracking
-analysis_task: Optional[asyncio.Task] = None
+# Per-user running tasks: user_id -> asyncio.Task
+user_analysis_tasks: dict[str, asyncio.Task] = {}
 
 
 def set_trading_service(service: TradingService):
-    """Set the trading service instance."""
     global trading_service
     trading_service = service
 
 
 def set_broadcast_callbacks(broadcast_status_fn, broadcast_log_fn):
-    """Set callback functions for broadcasting messages."""
-    global broadcast_status
-    global broadcast_log
-    broadcast_status = broadcast_status_fn
-    broadcast_log = broadcast_log_fn
-
-
-async def broadcast_status(state: AnalysisState):
-    """Default placeholder - will be overridden by main.py."""
+    """Legacy shim — no longer used but kept for backward-compat with main.py."""
     pass
 
 
-async def broadcast_log(message: str):
-    """Default placeholder - will be overridden by main.py."""
-    pass
+# ── Progress estimation ────────────────────────────────────────────────────────
+
+_PROGRESS_MAP: list[tuple[str, int]] = [
+    ("MOCK MODE: Analyzing", 5),
+    ("REAL MODE: Analyzing", 5),
+    ("Configuration built", 10),
+    ("Creating trading graph", 12),
+    ("Phase 1:", 12),
+    ("Analyst Reports", 12),
+    ("Running Market Analyst", 14),
+    ("Market Analyst completed", 18),
+    ("Running Social", 20),
+    ("Social Analyst completed", 24),
+    ("Running News Analyst", 26),
+    ("News Analyst completed", 30),
+    ("Running Fundamentals", 32),
+    ("Fundamentals Analyst completed", 37),
+    ("Running Momentum", 39),
+    ("Momentum Analyst completed", 44),
+    ("Phase 2:", 46),
+    ("Research Analysis", 46),
+    ("Bull Researcher", 50),
+    ("Bear Researcher", 55),
+    ("Research Manager", 60),
+    ("Phase 3:", 64),
+    ("Trading Decision", 64),
+    ("Trader completed", 70),
+    ("Phase 4:", 74),
+    ("Risk Assessment", 74),
+    ("Conservative", 78),
+    ("Neutral", 82),
+    ("Aggressive", 86),
+    ("Generating final", 90),
+    ("FINAL TRADING DECISION", 94),
+    ("Analysis completed successfully", 100),
+]
 
 
-async def run_analysis(request: AnalysisRequest):
-    """
-    Run the trading analysis in background.
-    Streams logs via WebSocket.
-    """
-    global analysis_task
+def _estimate_progress(message: str) -> Optional[int]:
+    msg_lower = message.lower()
+    for keyword, pct in _PROGRESS_MAP:
+        if keyword.lower() in msg_lower:
+            return pct
+    return None
+
+
+def _extract_decision(messages: list[str]) -> Optional[str]:
+    """Try to pull BUY / SELL / HOLD out of accumulated log messages."""
+    for msg in reversed(messages):
+        m = re.search(r"(?:Signal|Action):\s*(BUY|SELL|HOLD)", msg, re.IGNORECASE)
+        if m:
+            return m.group(1).upper()
+        m = re.search(r"final.trade.decision[:\s]+(BUY|SELL|HOLD)", msg, re.IGNORECASE)
+        if m:
+            return m.group(1).upper()
+    return None
+
+
+# ── DB helpers ─────────────────────────────────────────────────────────────────
+
+
+async def _save_result_to_db(user_id: str, ticker: str, result_text: str, decision: Optional[str]) -> None:
+    try:
+        pool = get_pool()
+        async with pool.acquire() as conn:
+            # Resolve company
+            company_id = await conn.fetchval("SELECT id FROM companies WHERE UPPER(ticker) = $1", ticker.upper())
+            if not company_id:
+                company_id = await conn.fetchval(
+                    """
+                    INSERT INTO companies (name, ticker) VALUES ($1, $2)
+                    ON CONFLICT (UPPER(ticker)) DO UPDATE SET ticker = EXCLUDED.ticker
+                    RETURNING id
+                    """,
+                    ticker.upper(),
+                    ticker.upper(),
+                )
+
+            # Resolve user_companies (upsert-style)
+            uc_id = await conn.fetchval(
+                "SELECT id FROM user_companies WHERE user_id = $1 AND company_id = $2",
+                user_id,
+                company_id,
+            )
+            if not uc_id:
+                uc_id = await conn.fetchval(
+                    """
+                    INSERT INTO user_companies (user_id, company_id) VALUES ($1, $2)
+                    ON CONFLICT (user_id, company_id) DO NOTHING RETURNING id
+                    """,
+                    user_id,
+                    company_id,
+                )
+            if not uc_id:
+                uc_id = await conn.fetchval(
+                    "SELECT id FROM user_companies WHERE user_id = $1 AND company_id = $2",
+                    user_id,
+                    company_id,
+                )
+
+            # Save history
+            save_text = decision or (result_text[-1000:] if result_text else "Analysis completed")
+            await conn.execute(
+                "INSERT INTO scan_history (user_company_id, result) VALUES ($1, $2)",
+                uc_id,
+                save_text,
+            )
+            logger.info(f"Saved analysis result for user {user_id}, ticker {ticker}")
+    except Exception as exc:
+        logger.error(f"Failed to save analysis result for {ticker}: {exc}", exc_info=True)
+
+
+# ── Per-ticker runner ──────────────────────────────────────────────────────────
+
+
+async def _run_single_ticker(user_id: str, request: AnalysisRequest) -> None:
+    ticker = request.ticker
+    accumulated: list[str] = []
 
     try:
-        await broadcast_status(AnalysisState.RUNNING)
-        await broadcast_log(f"Starting analysis for {request.ticker}")
-        await broadcast_log(f"Date: {request.analysis_date}")
-        await broadcast_log(f"Research depth: {request.research_depth}")
-        await broadcast_log(f"LLM Provider: {request.llm_provider.value}")
-        await broadcast_log(f"Shallow model: {request.shallow_model}")
-        await broadcast_log(f"Deep model: {request.deep_model}")
+        await user_manager.broadcast_user_progress(user_id, ticker, 0, "Starting")
 
-        # Run the trading analysis
-        async for log_message in trading_service.run_analysis(request):
-            await broadcast_log(log_message)
-            # Small delay to prevent overwhelming the client
-            await asyncio.sleep(0.01)
+        async for message in trading_service.run_analysis(request):
+            accumulated.append(message)
+            await user_manager.broadcast_user_log(user_id, ticker, message)
+            pct = _estimate_progress(message)
+            if pct is not None:
+                step_label = message.strip()[:60]
+                await user_manager.broadcast_user_progress(user_id, ticker, pct, step_label)
 
-        await broadcast_status(AnalysisState.IDLE)
+        # Final progress = 100
+        await user_manager.broadcast_user_progress(user_id, ticker, 100, "Complete")
+
+        # Extract & broadcast the decision
+        decision = _extract_decision(accumulated)
+        if decision:
+            await user_manager.broadcast_user_result(user_id, ticker, decision)
+
+        # Persist to DB
+        await _save_result_to_db(user_id, ticker, "\n".join(accumulated), decision)
 
     except asyncio.CancelledError:
-        await broadcast_log("Analysis stopped by user")
-        await broadcast_status(AnalysisState.STOPPED)
-        logger.info("Analysis task cancelled")
-        raise  # Re-raise to properly mark task as cancelled
-    except Exception as e:
-        error_msg = f"Analysis failed: {str(e)}"
-        logger.error(error_msg, exc_info=True)
-        await broadcast_log(error_msg)
-        await broadcast_status(AnalysisState.ERROR)
+        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Cancelled")
+        raise
+    except Exception as exc:
+        err_msg = f"Analysis failed for {ticker}: {exc}"
+        logger.error(err_msg, exc_info=True)
+        await user_manager.broadcast_user_log(user_id, ticker, err_msg)
+        await user_manager.broadcast_user_progress(user_id, ticker, -1, "Error")
+
+
+# ── Batch runner ───────────────────────────────────────────────────────────────
+
+
+async def _run_batch_analysis(user_id: str, request: AnalysisBatchRequest) -> None:
+    global user_analysis_tasks
+    try:
+        await user_manager.broadcast_user_status(user_id, AnalysisState.RUNNING)
+        await user_manager.broadcast_user_log(user_id, "", f"Starting analysis for: {', '.join(request.tickers)}")
+
+        single_requests = request.to_single_requests()
+        await asyncio.gather(
+            *[_run_single_ticker(user_id, r) for r in single_requests],
+            return_exceptions=True,
+        )
+
+        await user_manager.broadcast_user_status(user_id, AnalysisState.IDLE)
+
+    except asyncio.CancelledError:
+        await user_manager.broadcast_user_log(user_id, "", "Analysis batch stopped by user")
+        await user_manager.broadcast_user_status(user_id, AnalysisState.STOPPED)
+        raise
+    except Exception as exc:
+        logger.error(f"Batch analysis error for user {user_id}: {exc}", exc_info=True)
+        await user_manager.broadcast_user_log(user_id, "", f"Analysis error: {exc}")
+        await user_manager.broadcast_user_status(user_id, AnalysisState.ERROR)
     finally:
-        analysis_task = None
+        user_analysis_tasks.pop(user_id, None)
+
+
+# ── Routes ─────────────────────────────────────────────────────────────────────
 
 
 @router.get("/health")
 async def health_check():
-    """Trading service health check."""
     return {
         "status": "healthy",
         "service": "trading",
@@ -91,23 +222,45 @@ async def health_check():
     }
 
 
+@router.get("/tickers/search")
+async def search_tickers(q: str = Query(default="", max_length=50)):
+    """Search for company tickers from the database."""
+    try:
+        pool = get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT name, ticker FROM companies
+                WHERE UPPER(ticker) LIKE $1 OR LOWER(name) LIKE $2
+                ORDER BY ticker
+                LIMIT 15
+                """,
+                f"{q.upper()}%",
+                f"%{q.lower()}%",
+            )
+        return [{"name": row["name"], "symbol": row["ticker"]} for row in rows]
+    except Exception as exc:
+        logger.error(f"Ticker search error: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to search tickers")
+
+
+@router.get("/status")
+async def get_analysis_status(request: Request):
+    """Return the current analysis state and ticker progress for the authenticated user."""
+    user_id: str = request.state.user.get("sub")
+    task = user_analysis_tasks.get(user_id)
+    is_running = task is not None and not task.done()
+    return {
+        "state": user_manager.get_user_state(user_id).value,
+        "is_running": is_running,
+        "tickers": list(user_manager.get_user_ticker_progress(user_id).values()),
+    }
+
+
 @router.get("/config")
 async def get_config():
     """Get available configuration options for the frontend."""
     return {
-        "tickers": [
-            {"name": "Tesla", "symbol": "TSLA"},
-            {"name": "Apple", "symbol": "AAPL"},
-            {"name": "Microsoft", "symbol": "MSFT"},
-            {"name": "NVIDIA", "symbol": "NVDA"},
-            {"name": "Amazon", "symbol": "AMZN"},
-            {"name": "Meta", "symbol": "META"},
-            {"name": "Alphabet", "symbol": "GOOGL"},
-            {"name": "Roblox", "symbol": "RBLX"},
-            {"name": "Fubo", "symbol": "FUBO"},
-            {"name": "SMR", "symbol": "SMR"},
-            {"name": "Hims & Hers", "symbol": "HIMS"},
-        ],
         "analysts": ["Market Analyst", "Social Media Analyst", "News Analyst", "Fundamentals Analyst", "Momentum Analyst"],
         "depth": [
             {"name": "Shallow - Quick research, few debate and strategy discussion rounds", "value": 1},
@@ -141,8 +294,8 @@ async def get_config():
             ],
             "openrouter": [
                 {"name": "Meta: Llama 4 Scout", "value": "meta-llama/llama-4-scout:free"},
-                {"name": "Meta: Llama 3.3 8B Instruct - A lightweight and ultra-fast variant of Llama 3.3 70B", "value": "meta-llama/llama-3.3-8b-instruct:free"},
-                {"name": "google/gemini-2.0-flash-exp:free - Gemini Flash 2.0 offers a significantly faster time to first token", "value": "google/gemini-2.0-flash-exp:free"},
+                {"name": "Meta: Llama 3.3 8B Instruct", "value": "meta-llama/llama-3.3-8b-instruct:free"},
+                {"name": "Gemini 2.0 Flash Exp", "value": "google/gemini-2.0-flash-exp:free"},
             ],
             "ollama": [
                 {"name": "llama3.1 local", "value": "llama3.1"},
@@ -173,8 +326,8 @@ async def get_config():
                 {"name": "Gemini 2.5 Pro", "value": "gemini-2.5-pro-preview-06-05"},
             ],
             "openrouter": [
-                {"name": "DeepSeek V3 - a 685B-parameter, mixture-of-experts model", "value": "deepseek/deepseek-chat-v3-0324:free"},
-                {"name": "Deepseek - latest iteration of the flagship chat model family from the DeepSeek team.", "value": "deepseek/deepseek-chat-v3-0324:free"},
+                {"name": "DeepSeek V3", "value": "deepseek/deepseek-chat-v3-0324:free"},
+                {"name": "Deepseek chat latest", "value": "deepseek/deepseek-chat-v3-0324:free"},
             ],
             "ollama": [
                 {"name": "llama3.1 local", "value": "llama3.1"},
@@ -185,46 +338,41 @@ async def get_config():
 
 
 @router.post("/start")
-async def start_analysis(request: AnalysisRequest):
-    """
-    Start a new trading analysis.
-    Only one analysis can run at a time.
-    """
-    global analysis_task
+async def start_analysis(body: AnalysisBatchRequest, request: Request):
+    """Start a new batch analysis for the authenticated user."""
+    user_id: str = request.state.user.get("sub")
 
-    if analysis_task and not analysis_task.done():
+    existing_task = user_analysis_tasks.get(user_id)
+    if existing_task and not existing_task.done():
         raise HTTPException(status_code=409, detail="Analysis already running. Stop it first.")
 
-    logger.info(f"Starting analysis for {request.ticker}")
-    analysis_task = asyncio.create_task(run_analysis(request))
+    logger.info(f"Starting batch analysis for user {user_id}: {body.tickers}")
+    user_manager.reset_user_session(user_id, body.tickers)
+
+    task = asyncio.create_task(_run_batch_analysis(user_id, body))
+    user_analysis_tasks[user_id] = task
 
     return {
         "status": "started",
-        "ticker": request.ticker,
+        "tickers": body.tickers,
         "timestamp": datetime.utcnow().isoformat() + "Z",
     }
 
 
 @router.post("/stop")
-async def stop_analysis():
-    """
-    Stop the currently running analysis.
-    """
-    global analysis_task
+async def stop_analysis(request: Request):
+    """Stop the currently running analysis for the authenticated user."""
+    user_id: str = request.state.user.get("sub")
 
-    if not analysis_task or analysis_task.done():
+    task = user_analysis_tasks.get(user_id)
+    if not task or task.done():
         raise HTTPException(status_code=400, detail="No analysis is currently running")
 
-    logger.info("Stopping analysis")
-    analysis_task.cancel()
-
-    # Wait for the task to actually be cancelled
+    logger.info(f"Stopping analysis for user {user_id}")
+    task.cancel()
     try:
-        await analysis_task
+        await task
     except asyncio.CancelledError:
-        pass  # Expected when task is cancelled
+        pass
 
-    return {
-        "status": "stopped",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-    }
+    return {"status": "stopped", "timestamp": datetime.utcnow().isoformat() + "Z"}

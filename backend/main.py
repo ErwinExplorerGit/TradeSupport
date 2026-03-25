@@ -23,7 +23,7 @@ from services.trading_service.routes import set_trading_service, set_broadcast_c
 from services.auth_service import router as auth_router
 from services.history_service import HistoryService, router as history_router
 from services.history_service.routes import set_history_service
-from services.socket_service import router as socket_router, broadcast_status, broadcast_log
+from services.socket_service import router as socket_router
 from services.socket_service import manager as socket_manager
 from services.health_service import router as health_router, set_health_callbacks
 from middleware.middleware import Middleware
@@ -54,11 +54,11 @@ async def lifespan(app: FastAPI):
     # Initialize services
     set_trading_service(trading_service)
     set_history_service(history_service)
-    set_broadcast_callbacks(broadcast_status, broadcast_log)
+    set_broadcast_callbacks(None, None)  # no-op shim kept for compat
     set_health_callbacks(
-        get_state=lambda: socket_manager.current_state.value,
+        get_state=lambda: "idle",
         get_trading_mode=lambda: "real" if trading_service.is_real_mode else "mock",
-        get_active_connections=lambda: len(socket_manager.active_websockets),
+        get_active_connections=lambda: sum(len(v) for v in socket_manager.user_websockets.values()),
     )
 
     # Initialise database connection pool
