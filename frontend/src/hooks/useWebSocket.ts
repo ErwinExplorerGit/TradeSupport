@@ -11,6 +11,8 @@ export interface UseWebSocketResult {
   state: AnalysisState;
   tickerProgress: Record<string, TickerProgress>;
   clearMessages: () => void;
+  clearProgress: () => void;
+  initProgress: (entries: TickerProgress[]) => void;
 }
 
 export const useWebSocket = (): UseWebSocketResult => {
@@ -23,10 +25,10 @@ export const useWebSocket = (): UseWebSocketResult => {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const shouldConnectRef = useRef(true);
 
-  const updateProgress = useCallback((ticker: string, update: Partial<TickerProgress>) => {
+  const updateProgress = useCallback((key: string, update: Partial<TickerProgress>) => {
     setTickerProgress((prev) => ({
       ...prev,
-      [ticker]: { ...(prev[ticker] ?? { ticker, percentage: 0, step: '', status: 'pending' }), ...update },
+      [key]: { ...(prev[key] ?? { ticker: update.ticker ?? key, percentage: 0, step: '', status: 'pending' }), ...update },
     }));
   }, []);
 
@@ -66,20 +68,26 @@ export const useWebSocket = (): UseWebSocketResult => {
         } else if (data.type === 'status') {
           setState(data.state);
         } else if (data.type === 'progress') {
-          updateProgress(data.ticker, {
+          const key = data.analysis_date ? `${data.ticker}:${data.analysis_date}` : data.ticker;
+          updateProgress(key, {
             ticker: data.ticker,
+            analysis_date: data.analysis_date,
             percentage: data.percentage,
             step: data.step,
             status: data.status,
           });
         } else if (data.type === 'result') {
-          updateProgress(data.ticker, { decision: data.decision, status: 'done', percentage: 100 });
+          const key = data.analysis_date ? `${data.ticker}:${data.analysis_date}` : data.ticker;
+          updateProgress(key, { decision: data.decision, status: 'done', percentage: 100 });
         } else if (data.type === 'batch_status') {
-          // Snapshot sent on reconnect — restore all ticker progress at once
+          // Snapshot sent on reconnect — only restore tickers that are still active
           setTickerProgress((prev) => {
             const next = { ...prev };
             for (const tp of data.tickers) {
-              next[tp.ticker] = tp;
+              if (tp.status === 'running' || tp.status === 'pending') {
+                const key = tp.analysis_date ? `${tp.ticker}:${tp.analysis_date}` : tp.ticker;
+                next[key] = { ...prev[key], ...tp };
+              }
             }
             return next;
           });
@@ -127,9 +135,27 @@ export const useWebSocket = (): UseWebSocketResult => {
 
   const clearMessages = useCallback(() => {
     setMessages([]);
+  }, []);
+
+  const clearProgress = useCallback(() => {
+    setMessages([]);
     setTickerProgress({});
   }, []);
 
-  return { isConnected, messages, state, tickerProgress, clearMessages };
+  // Seed completed tickers (e.g. today's history) without overwriting live entries
+  const initProgress = useCallback((entries: TickerProgress[]) => {
+    setTickerProgress((prev) => {
+      const next = { ...prev };
+      for (const entry of entries) {
+        const key = entry.analysis_date ? `${entry.ticker}:${entry.analysis_date}` : entry.ticker;
+        if (!next[key]) {
+          next[key] = entry;
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  return { isConnected, messages, state, tickerProgress, clearMessages, clearProgress, initProgress };
 };
 

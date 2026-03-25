@@ -365,6 +365,30 @@
   white-space: nowrap;
 }
 
+.history-analysis-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.history-today-badge {
+  display: inline-block;
+  background: #e6f9ef;
+  color: #1a7a47;
+  border-radius: 50px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  letter-spacing: 0.03em;
+}
+
+.history-agent {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+  white-space: nowrap;
+}
+
 // ── Decision Badges ────────────────────────────────────────────────────────────
 .history-badge {
   display: inline-flex;
@@ -545,6 +569,16 @@
   svg {
     font-size: 0.8rem;
   }
+}
+
+.history-modal-agent {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+  background: $color-bg-panel;
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
 }
 
 .history-modal-body {

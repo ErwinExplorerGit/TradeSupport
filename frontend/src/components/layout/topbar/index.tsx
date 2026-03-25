@@ -4,7 +4,7 @@ import "./styles.scss";
 
 const NAV_LINKS = [
   { label: "Dashboard", to: "/dashboard" },
-  { label: "Analyze", to: "/analyze" },
+  { label: "Analysis", to: "/analyze" },
   { label: "History", to: "/history" },
   { label: "Account", to: "/account" },
 ] as const;

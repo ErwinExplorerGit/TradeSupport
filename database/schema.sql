@@ -64,12 +64,16 @@ CREATE TABLE
         id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
         user_company_id UUID NOT NULL REFERENCES user_companies (id) ON DELETE CASCADE,
         scanned_at TIMESTAMPTZ NOT NULL DEFAULT NOW (),
-        result TEXT
+        result TEXT,
+        agent TEXT,
+        analysis_date DATE
     );
 
 CREATE INDEX IF NOT EXISTS idx_scan_history_user_company_id ON scan_history (user_company_id);
 
 CREATE INDEX IF NOT EXISTS idx_scan_history_scanned_at ON scan_history (scanned_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_scan_history_analysis_date ON scan_history (analysis_date DESC);
 
 -- =============================================================
 -- seed data — companies

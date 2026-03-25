@@ -21,6 +21,16 @@ export const api = {
   },
 
   /**
+   * Add a ticker to the current (or new) analysis session without resetting existing results
+   */
+  async addTicker(request: AnalysisRequest): Promise<void> {
+    // The backend expects a single-ticker AnalysisRequest at /add-ticker
+    const singleRequest = { ...request, ticker: request.tickers[0] };
+    const { data } = await axiosInstance.post('/api/trading/add-ticker', singleRequest);
+    return data;
+  },
+
+  /**
    * Health check
    */
   async healthCheck(): Promise<HealthCheckResponse> {

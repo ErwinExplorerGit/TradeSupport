@@ -17,16 +17,20 @@ import {
 
 interface ConfigPanelProps {
   onStartAnalysis: (config: ConfigFormData) => void;
+  onAddTicker: (config: ConfigFormData) => Promise<void>;
   onStopAnalysis: () => void;
   analysisState: AnalysisState;
   config: ApiConfig | null;
+  isStarting?: boolean;
 }
 
 export const ConfigPanel = ({
   onStartAnalysis,
+  onAddTicker,
   onStopAnalysis,
   analysisState,
   config,
+  isStarting = false,
 }: ConfigPanelProps) => {
   const today = new Date().toISOString().split("T")[0];
 
@@ -37,6 +41,8 @@ export const ConfigPanel = ({
     "Fundamentals Analyst": "fundamentals",
     "Momentum Analyst": "momentum",
   };
+
+  const [isAddingTicker, setIsAddingTicker] = useState(false);
 
   const [formData, setFormData] = useState<ConfigFormData>({
     tickers: ["TSLA"],
@@ -88,60 +94,126 @@ export const ConfigPanel = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.tickers.length === 0) return;
-    onStartAnalysis(formData);
+    const anyAnalystEnabled = Object.values(formData.analysts).some(Boolean);
+    if (!anyAnalystEnabled) return;
+    if (!formData.analysisDate) return;
+    if (isRunning) {
+      setIsAddingTicker(true);
+      try {
+        await onAddTicker(formData);
+      } finally {
+        setIsAddingTicker(false);
+      }
+    } else {
+      onStartAnalysis(formData);
+    }
   };
 
   const isRunning = analysisState === "running";
 
   return (
-    <div className="config-panel">
-      <h2>Configuration</h2>
+    <section className="cp-section">
       <form onSubmit={handleSubmit}>
-        <div className="form-content">
-          <TickerField
-            value={formData.tickers}
-            onChange={(v) => handleInputChange("tickers", v)}
-            disabled={isRunning}
-          />
-          <DateField
-            value={formData.analysisDate}
-            onChange={(v) => handleInputChange("analysisDate", v)}
-            disabled={isRunning}
-          />
-          <AnalystsField
-            analysts={formData.analysts}
-            availableAnalysts={config?.analysts || []}
-            analystMap={analystMap}
-            onChange={handleAnalystChange}
-            disabled={isRunning}
-          />
-          <ResearchDepthField
-            value={formData.researchDepth}
-            depths={config?.depth || []}
-            onChange={(v) => handleInputChange("researchDepth", v)}
-            disabled={isRunning}
-          />
-          <LLMProviderField
-            value={formData.llmProvider}
-            providers={config?.provider || []}
-            onChange={(v) => handleInputChange("llmProvider", v as LLMProvider)}
-            disabled={isRunning}
-          />
-          <ModelSelector
-            shallowModel={formData.shallowModel}
-            deepModel={formData.deepModel}
-            shallowModels={config?.shallow[formData.llmProvider] || []}
-            deepModels={config?.deep[formData.llmProvider] || []}
-            onShallowChange={(v) => handleInputChange("shallowModel", v)}
-            onDeepChange={(v) => handleInputChange("deepModel", v)}
-            disabled={isRunning}
+        <div className="cp-card">
+          {/* Row 1 — Target Tickers */}
+          <div>
+            <h3 className="cp-card-title">Target Ticker</h3>
+            <p className="cp-card-desc">
+              Select a stock symbol to analyse. You can change it between runs.
+            </p>
+            <TickerField
+              value={formData.tickers}
+              onChange={(v) => handleInputChange("tickers", v)}
+              disabled={isAddingTicker}
+            />
+          </div>
+
+          <div className="cp-divider" />
+
+          {/* Row 2 — Analysis Date */}
+          <div>
+            <h3 className="cp-card-title">Analysis Date</h3>
+            <p className="cp-card-desc">The date the analysis is based on.</p>
+            <DateField
+              value={formData.analysisDate}
+              onChange={(v) => handleInputChange("analysisDate", v)}
+              disabled={isAddingTicker}
+            />
+          </div>
+
+          <div className="cp-divider" />
+
+          {/* Row 3 — Analyst Agents */}
+          <div>
+            <h3 className="cp-card-title">Analyst Agents</h3>
+            <p className="cp-card-desc">
+              Choose which AI analysts to activate.
+            </p>
+            <AnalystsField
+              analysts={formData.analysts}
+              availableAnalysts={config?.analysts || []}
+              analystMap={analystMap}
+              onChange={handleAnalystChange}
+              disabled={isAddingTicker}
+            />
+          </div>
+
+          <div className="cp-divider" />
+
+          {/* Row 4 — Research Depth */}
+          <div>
+            <h3 className="cp-card-title">Research Depth</h3>
+            <p className="cp-card-desc">How thorough should the analysis be.</p>
+            <ResearchDepthField
+              value={formData.researchDepth}
+              depths={config?.depth || []}
+              onChange={(v) => handleInputChange("researchDepth", v)}
+              disabled={isAddingTicker}
+            />
+          </div>
+
+          <div className="cp-divider" />
+
+          {/* Row 5 — LLM Provider + Models */}
+          <div>
+            <h3 className="cp-card-title">AI Model Configuration</h3>
+            <p className="cp-card-desc">
+              Select the LLM provider and models for reasoning.
+            </p>
+            <div className="cp-model-grid">
+              <LLMProviderField
+                value={formData.llmProvider}
+                providers={config?.provider || []}
+                onChange={(v) =>
+                  handleInputChange("llmProvider", v as LLMProvider)
+                }
+                disabled={isAddingTicker}
+              />
+              <ModelSelector
+                shallowModel={formData.shallowModel}
+                deepModel={formData.deepModel}
+                shallowModels={config?.shallow[formData.llmProvider] || []}
+                deepModels={config?.deep[formData.llmProvider] || []}
+                onShallowChange={(v) => handleInputChange("shallowModel", v)}
+                onDeepChange={(v) => handleInputChange("deepModel", v)}
+                disabled={isAddingTicker}
+              />
+            </div>
+          </div>
+
+          <div className="cp-divider" />
+
+          {/* Actions */}
+          <ActionButtons
+            isRunning={isRunning}
+            isAddingTicker={isAddingTicker}
+            isStarting={isStarting}
           />
         </div>
-        <ActionButtons isRunning={isRunning} onStop={onStopAnalysis} />
       </form>
-    </div>
+    </section>
   );
 };

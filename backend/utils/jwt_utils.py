@@ -10,8 +10,8 @@ _ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
 def create_access_token(data: dict) -> str:
     payload = data.copy()
-    # payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=_ACCESS_TOKEN_EXPIRE_MINUTES)
-    payload["exp"] = datetime.now(timezone.utc) + timedelta(seconds=1)
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=_ACCESS_TOKEN_EXPIRE_MINUTES)
+    # payload["exp"] = datetime.now(timezone.utc) + timedelta(seconds=1)
     return jwt.encode(payload, _SECRET, algorithm=_ALGORITHM)
 
 

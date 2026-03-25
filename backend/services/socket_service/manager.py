@@ -82,8 +82,9 @@ async def broadcast_user_log(user_id: str, ticker: str, message: str) -> None:
     )
 
 
-async def broadcast_user_progress(user_id: str, ticker: str, percentage: int, step: str) -> None:
-    progress = user_ticker_progress.setdefault(user_id, {}).setdefault(ticker, {"ticker": ticker, "percentage": 0, "step": "Queued", "status": "pending", "decision": None})
+async def broadcast_user_progress(user_id: str, ticker: str, percentage: int, step: str, analysis_date: str = "") -> None:
+    key = f"{ticker}:{analysis_date}" if analysis_date else ticker
+    progress = user_ticker_progress.setdefault(user_id, {}).setdefault(key, {"ticker": ticker, "analysis_date": analysis_date, "percentage": 0, "step": "Queued", "status": "pending", "decision": None})
     progress["percentage"] = percentage
     progress["step"] = step
     if percentage >= 100:
@@ -98,6 +99,7 @@ async def broadcast_user_progress(user_id: str, ticker: str, percentage: int, st
         {
             "type": "progress",
             "ticker": ticker,
+            "analysis_date": analysis_date,
             "percentage": percentage,
             "step": step,
             "status": progress["status"],
@@ -105,11 +107,12 @@ async def broadcast_user_progress(user_id: str, ticker: str, percentage: int, st
     )
 
 
-async def broadcast_user_result(user_id: str, ticker: str, decision: str) -> None:
-    progress = user_ticker_progress.setdefault(user_id, {}).get(ticker, {})
+async def broadcast_user_result(user_id: str, ticker: str, decision: str, analysis_date: str = "") -> None:
+    key = f"{ticker}:{analysis_date}" if analysis_date else ticker
+    progress = user_ticker_progress.setdefault(user_id, {}).get(key, {})
     if progress:
         progress["decision"] = decision
-    await broadcast_to_user(user_id, {"type": "result", "ticker": ticker, "decision": decision})
+    await broadcast_to_user(user_id, {"type": "result", "ticker": ticker, "analysis_date": analysis_date, "decision": decision})
 
 
 # ── Query helpers ───────────────────────────────────────────────────────────────
@@ -127,10 +130,16 @@ def get_user_ticker_progress(user_id: str) -> dict:
     return user_ticker_progress.get(user_id, {})
 
 
-def reset_user_session(user_id: str, tickers: list[str]) -> None:
+def reset_user_session(user_id: str, ticker_dates: list[tuple[str, str]]) -> None:
     """Start a fresh session — clears history and initialises progress."""
     user_message_history[user_id] = []
-    user_ticker_progress[user_id] = {t: {"ticker": t, "percentage": 0, "step": "Queued", "status": "pending", "decision": None} for t in tickers}
+    user_ticker_progress[user_id] = {f"{t}:{d}": {"ticker": t, "analysis_date": d, "percentage": 0, "step": "Queued", "status": "pending", "decision": None} for t, d in ticker_dates}
+
+
+def register_ticker(user_id: str, ticker: str, analysis_date: str = "") -> None:
+    """Add a single ticker to progress without resetting existing entries."""
+    key = f"{ticker}:{analysis_date}" if analysis_date else ticker
+    user_ticker_progress.setdefault(user_id, {})[key] = {"ticker": ticker, "analysis_date": analysis_date, "percentage": 0, "step": "Queued", "status": "pending", "decision": None}
 
 
 # ── Legacy shims (kept so existing imports don't break) ────────────────────────

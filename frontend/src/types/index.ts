@@ -17,6 +17,7 @@ export interface TickerProgress {
   step: string;
   status: TickerStatus;
   decision?: string | null;
+  analysis_date?: string;
 }
 
 export interface AnalysisRequest {
@@ -44,6 +45,7 @@ export interface StatusMessage {
 export interface ProgressMessage {
   type: 'progress';
   ticker: string;
+  analysis_date?: string;
   percentage: number;
   step: string;
   status: TickerStatus;
@@ -52,6 +54,7 @@ export interface ProgressMessage {
 export interface ResultMessage {
   type: 'result';
   ticker: string;
+  analysis_date?: string;
   decision: string;
 }
 
@@ -123,6 +126,8 @@ export interface HistoryRecord {
   company_name: string;
   result: string | null;
   scanned_at: string;
+  agent?: string | null;
+  analysis_date?: string | null;
 }
 
 export interface HistoryResponse {

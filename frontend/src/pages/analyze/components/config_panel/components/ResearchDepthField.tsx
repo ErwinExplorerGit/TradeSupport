@@ -21,7 +21,6 @@ export const ResearchDepthField = ({
   disabled,
 }: ResearchDepthFieldProps) => (
   <Dropdown
-    label="Research Depth"
     value={value}
     options={depths.map((d) => ({ label: d.name, value: depthMap[d.value] }))}
     onChange={(v) => onChange(v as ResearchDepth)}

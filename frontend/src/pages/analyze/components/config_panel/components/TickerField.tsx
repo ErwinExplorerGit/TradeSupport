@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FiSearch, FiX, FiPlus } from "react-icons/fi";
+import { FiSearch, FiX } from "react-icons/fi";
 import { api } from "../../../../../services/api";
 import { TickerSuggestion } from "../../../../../types";
-
-const MAX_TICKERS = 5;
 
 interface TickerFieldProps {
   value: string[];
@@ -25,6 +23,8 @@ export const TickerField = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
 
+  const selected = value[0] ?? null;
+
   const fetchSuggestions = useCallback(
     async (q: string) => {
       if (!q.trim()) {
@@ -35,7 +35,6 @@ export const TickerField = ({
       setLoading(true);
       try {
         const results = await api.searchTickers(q);
-        // Filter out already-selected tickers
         const filtered = results.filter(
           (r) => !value.includes(r.symbol.toUpperCase()),
         );
@@ -79,16 +78,18 @@ export const TickerField = ({
 
   const addTicker = (symbol: string) => {
     const upper = symbol.toUpperCase().trim();
-    if (!upper || value.includes(upper) || value.length >= MAX_TICKERS) return;
-    onChange([...value, upper]);
+    if (!upper) return;
+    onChange([upper]);
     setQuery("");
     setSuggestions([]);
     setIsOpen(false);
-    inputRef.current?.focus();
+    inputRef.current?.blur();
   };
 
-  const removeTicker = (ticker: string) => {
-    onChange(value.filter((t) => t !== ticker));
+  const removeTicker = () => {
+    onChange([]);
+    setQuery("");
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -108,72 +109,50 @@ export const TickerField = ({
     } else if (e.key === "Escape") {
       setIsOpen(false);
       setActiveIndex(-1);
+    } else if (e.key === "Backspace" && !query && selected) {
+      removeTicker();
     }
   };
 
-  const canAdd = value.length < MAX_TICKERS && !disabled;
-
   return (
-    <div className="form-section ticker-field">
-      <label className="form-label">Ticker Symbols</label>
-
-      {/* Selected tickers as tags */}
-      {value.length > 0 && (
-        <div className="ticker-tags">
-          {value.map((t) => (
-            <span key={t} className="ticker-tag">
-              {t}
-              {!disabled && (
-                <button
-                  type="button"
-                  className="ticker-tag-remove"
-                  onClick={() => removeTicker(t)}
-                  aria-label={`Remove ${t}`}
-                >
-                  <FiX size={11} />
-                </button>
-              )}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Search input */}
-      {canAdd && (
-        <div className="ticker-search-wrap">
+    <div className="ticker-field">
+      <div className="ticker-search-wrap">
+        {/* Selected ticker chip inside the input row */}
+        {selected ? (
+          <span className="ticker-inline-chip">
+            {selected}
+            {!disabled && (
+              <button
+                type="button"
+                className="ticker-inline-remove"
+                onClick={removeTicker}
+                aria-label={`Remove ${selected}`}
+              >
+                <FiX size={10} />
+              </button>
+            )}
+          </span>
+        ) : (
           <span className="ticker-search-icon">
             <FiSearch size={14} />
           </span>
-          <input
-            ref={inputRef}
-            type="text"
-            className="form-input ticker-search-input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value.toUpperCase())}
-            onKeyDown={handleKeyDown}
-            onFocus={() => query && setSuggestions.length && setIsOpen(true)}
-            placeholder={
-              value.length === 0 ? "Search ticker, e.g. TSLA" : "Add another…"
-            }
-            disabled={disabled}
-            autoComplete="off"
-          />
-          {query && (
-            <button
-              type="button"
-              className="ticker-add-btn"
-              onClick={() => addTicker(query)}
-              title={`Add ${query}`}
-            >
-              <FiPlus size={14} />
-            </button>
-          )}
-        </div>
-      )}
+        )}
 
-      {!canAdd && !disabled && (
-        <p className="form-help">Maximum {MAX_TICKERS} tickers selected.</p>
-      )}
+        <input
+          ref={inputRef}
+          type="text"
+          className={`form-input ticker-search-input${selected ? " ticker-search-input--has-chip" : ""}`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value.toUpperCase())}
+          onKeyDown={handleKeyDown}
+          onFocus={() => query && suggestions.length > 0 && setIsOpen(true)}
+          placeholder={
+            selected ? "Search to change ticker…" : "Search ticker, e.g. TSLA"
+          }
+          autoComplete="off"
+          disabled={disabled}
+        />
+      </div>
 
       {/* Suggestions dropdown */}
       {isOpen && (

@@ -22,14 +22,14 @@ export const ModelSelector = ({
 }: ModelSelectorProps) => (
   <>
     <Dropdown
-      label="Shallow Thinker Model"
+      label="Fast Model"
       value={shallowModel}
       options={shallowModels.map((m) => ({ label: m.name, value: m.value }))}
       onChange={onShallowChange}
       disabled={disabled}
     />
     <Dropdown
-      label="Deep Thinker Model"
+      label="Deep Model"
       value={deepModel}
       options={deepModels.map((m) => ({ label: m.name, value: m.value }))}
       onChange={onDeepChange}
