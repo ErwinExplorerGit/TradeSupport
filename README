@@ -1,0 +1,32 @@
+==============================
+  TradeSupport — Docker Guide
+==============================
+
+REQUIREMENTS
+------------
+- Docker Desktop must be installed and running
+
+
+COMMANDS
+--------
+Start the app:
+    docker compose up --build
+
+Start in background:
+    docker compose up --build -d
+
+Stop the app:
+    docker compose down 
+
+Stop and delete all data:
+    docker compose down -v
+
+View logs:
+    docker compose logs -f
+
+
+URLS
+----
+Frontend  → http://localhost:5173
+Backend   → http://localhost:8000
+pgAdmin   → http://localhost:5050  (admin@admin.com / admin)

@@ -48,16 +48,6 @@ function DecisionBadge({ result }: { result: string | null }) {
   return <span className="history-badge history-badge--unknown">—</span>;
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 function formatDateOnly(dateStr: string) {
   return new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, {
     year: "numeric",

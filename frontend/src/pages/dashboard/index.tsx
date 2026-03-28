@@ -30,7 +30,7 @@ const QUICK_ACTIONS = [
 const INFO_CARDS = [
   {
     title: "Multi-Agent Analysis",
-    text: "Five specialized AI analysts — market, social, news, fundamentals, and momentum — collaborate to deliver comprehensive stock insights.",
+    text: "Five specialized AI analysts. market, social, news, fundamentals, and momentum. collaborate to deliver comprehensive stock insights.",
   },
   {
     title: "Flexible LLM Support",
