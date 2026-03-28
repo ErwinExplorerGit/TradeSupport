@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 _MAX_FAILED_ATTEMPTS = 5
 _REFRESH_TOKEN_EXPIRY_DAYS = 7
 
-# Dummy hash used for timing-safe rejection when the user does not exist
-_DUMMY_HASH = "$2b$12$" + "x" * 53
+# Dummy hash used for timing-safe rejection when the user does not exist.
+# This is a real bcrypt hash so checkpw never throws ValueError: Invalid salt.
+_DUMMY_HASH = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtGJ2BGwFVjQXNZUuHJMf5i9B0aq"
 
 
 class LoginService:
@@ -45,7 +46,10 @@ class LoginService:
 
         if row is None:
             # Perform a dummy verify to prevent user-enumeration via timing
-            verify_password(plain_password, _DUMMY_HASH)
+            try:
+                verify_password(plain_password, _DUMMY_HASH)
+            except (ValueError, Exception):
+                pass
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         if not row["is_active"]:
