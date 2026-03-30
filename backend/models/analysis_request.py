@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import date
 from typing import List
 
@@ -25,8 +25,8 @@ class AnalysisRequest(BaseModel):
         """Convert ticker to uppercase."""
         return v.upper().strip()
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "ticker": "TSLA",
                 "analysis_date": "2026-02-16",
@@ -43,6 +43,7 @@ class AnalysisRequest(BaseModel):
                 "deep_model": "gpt-4o-mini",
             },
         }
+    )
 
 
 class AnalysisBatchRequest(BaseModel):
