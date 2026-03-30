@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 # Load environment variables before any config/service imports so that
 # module-level config objects (e.g. SMTPConfig, database DSN) read the
 # correct values from .env on first access.
-_env_path = Path(__file__).resolve().parent / ".env"
+_env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=_env_path)
 
 from fastapi import FastAPI

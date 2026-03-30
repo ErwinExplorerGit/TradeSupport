@@ -7,6 +7,31 @@ REQUIREMENTS
 - Docker Desktop must be installed and running
 
 
+CONFIGURATION
+-------------
+All environment variables are managed in a single file at the project root:
+
+    .env
+
+The file is divided into three sections:
+
+    # --- Frontend ---
+    VITE_API_BASE_URL
+    VITE_WS_URL
+
+    # --- Backend ---
+    OPENAI_API_KEY, GOOGLE_API_KEY, ANTHROPIC_API_KEY, ...
+    ALLOWED_ORIGINS
+    SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, ...
+    JWT_SECRET_KEY, ACCESS_TOKEN_EXPIRES_MINUTES, REFRESH_TOKEN_EXPIRES_DAYS
+
+    # --- Database ---
+    POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
+    PGADMIN_DEFAULT_EMAIL, PGADMIN_DEFAULT_PASSWORD, PGADMIN_PORT
+
+See .env.example for a full reference.
+
+
 COMMANDS
 --------
 Start the app:
@@ -16,13 +41,32 @@ Start in background:
     docker compose up --build -d
 
 Stop the app:
-    docker compose down 
+    docker compose down
 
-Stop and delete all data:
+Stop and delete all data (including volumes):
     docker compose down -v
 
-View logs:
+View logs (all services):
     docker compose logs -f
+
+View logs for a specific service:
+    docker compose logs -f backend
+    docker compose logs -f frontend
+    docker compose logs -f postgres
+    docker compose logs -f pgadmin
+
+Rebuild a single service:
+    docker compose up -d --build backend
+    docker compose up -d --build frontend
+
+
+TESTING
+-------
+Backend unit tests (from backend/testing/):
+    pytest -m unit
+
+Frontend tests (from frontend/):
+    npm test
 
 
 URLS
