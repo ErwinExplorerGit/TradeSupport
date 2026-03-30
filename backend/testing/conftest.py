@@ -15,7 +15,7 @@ import pytest
 # ── Path bootstrap ─────────────────────────────────────────────────────────────
 # Insert the backend directory at the front of sys.path so every test can
 # import backend modules directly (e.g. `from utils.bcrypt_utils import …`).
-BACKEND_DIR = Path(__file__).resolve().parent.parent.parent / "backend"
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
